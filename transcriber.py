@@ -8,31 +8,35 @@ Pipeline:
   4. Print a clean two-line summary
 
 Install deps:
-  pip install deepgram-sdk openai
+  pip install deepgram-sdk openai python-dotenv
 """
 
 import sys
+import os
 from pathlib import Path
 from deepgram import DeepgramClient, PrerecordedOptions
 from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # =============================================================================
-#  🔑 API KEY PLACEHOLDERS — replace before running
+#  🔑 API KEYS (loaded from .env)
 # =============================================================================
 
-DEEPGRAM_API_KEY   = "4cf44a90f6ca4a95aa791dd13a476a4b923fab85"    # e.g. "abc123..."
-OPENROUTER_API_KEY = "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"  # e.g. "sk-or-..."
+DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 # =============================================================================
-#  Model configuration (change freely)
+#  Model configuration
 # =============================================================================
 
 DEEPGRAM_MODEL   = "nova-2"
-OPENROUTER_MODEL = "openai/gpt-4o-mini"      # any model on openrouter.ai
+OPENROUTER_MODEL = "openai/gpt-4o-mini"
 OPENROUTER_BASE  = "https://openrouter.ai/api/v1"
 
 # =============================================================================
-#  System prompt for the summarisation step
+#  System prompt for summarisation
 # =============================================================================
 
 SYSTEM_PROMPT = """
@@ -74,9 +78,9 @@ def transcribe_audio(file_path: str) -> str:
     options = PrerecordedOptions(
         model=DEEPGRAM_MODEL,
         language="en",
-        punctuate=True,      # add punctuation
-        diarize=True,        # label speakers where possible
-        smart_format=True,   # normalise numbers, dates, etc.
+        punctuate=True,
+        diarize=True,
+        smart_format=True,
     )
 
     response = dg.listen.prerecorded.v("1").transcribe_file(
@@ -110,10 +114,10 @@ def summarize_transcript(transcript: str) -> str:
         model=OPENROUTER_MODEL,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user",   "content": f"Call transcript:\n\n{transcript}"},
+            {"role": "user", "content": f"Call transcript:\n\n{transcript}"},
         ],
-        temperature=0.3,   # low = focused, deterministic output
-        max_tokens=120,    # two concise sentences fit easily
+        temperature=0.3,
+        max_tokens=120,
     )
 
     return response.choices[0].message.content.strip()
@@ -143,17 +147,18 @@ def main():
         print("Usage: python transcribe_and_summarize.py <path/to/call.m4a>")
         sys.exit(1)
 
-    # Fail fast if keys are still placeholders
-    if DEEPGRAM_API_KEY == "[DEEPGRAM_API_KEY]":
-        raise ValueError("Set your Deepgram API key in DEEPGRAM_API_KEY.")
-    if OPENROUTER_API_KEY == "[OPENROUTER_API_KEY]":
-        raise ValueError("Set your OpenRouter API key in OPENROUTER_API_KEY.")
+    # Fail fast if keys are missing from .env
+    if not DEEPGRAM_API_KEY:
+        raise ValueError("DEEPGRAM_API_KEY not found in .env")
+
+    if not OPENROUTER_API_KEY:
+        raise ValueError("OPENROUTER_API_KEY not found in .env")
 
     print("\n🎙  Call-Log Transcription & Summarisation Pipeline")
     print("=" * 64)
 
     transcript = transcribe_audio(sys.argv[1])
-    summary    = summarize_transcript(transcript)
+    summary = summarize_transcript(transcript)
 
     print("[3/3] Done!")
     display_results(transcript, summary)
