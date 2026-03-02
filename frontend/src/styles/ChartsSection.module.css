@@ -1,0 +1,103 @@
+.chartsSection {
+  animation: slideUp 0.5s ease 0.3s both;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chartsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.chartCard {
+  background: linear-gradient(135deg, #fffdf9 0%, #f8f4ec 100%);
+  border: 1px solid #e4dccd;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 4px 16px rgba(17, 34, 64, 0.06);
+  transition: all 0.3s ease;
+}
+
+.chartCard:hover {
+  box-shadow: 0 12px 28px rgba(17, 34, 64, 0.1);
+  transform: scale(1.01);
+}
+
+.chartTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #112240;
+  letter-spacing: -0.5px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #eee4d3;
+}
+
+.chartLegend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e4dccd;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.notEvaluatedMessage {
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed #ddd4c3;
+  border-radius: 10px;
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 16px;
+  text-align: center;
+}
+
+@media (max-width: 1024px) {
+  .chartsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .chartCard {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .chartCard {
+    padding: 16px;
+  }
+
+  .chartTitle {
+    font-size: 14px;
+  }
+}

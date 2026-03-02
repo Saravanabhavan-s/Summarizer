@@ -1,0 +1,58 @@
+.breakdownCard {
+  background: linear-gradient(135deg, #fffdf9 0%, #f8f4ec 100%);
+  border: 1px solid #e4dccd;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 4px 16px rgba(17, 34, 64, 0.06);
+  animation: slideUp 0.5s ease 0.2s both;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.breakdownCard:hover {
+  transform: scale(1.01);
+  box-shadow: 0 12px 28px rgba(17, 34, 64, 0.1);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #eee4d3;
+}
+
+.icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #112240;
+  letter-spacing: -0.5px;
+}
+
+.progressBars {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+@media (max-width: 768px) {
+  .breakdownCard {
+    padding: 20px;
+  }
+}

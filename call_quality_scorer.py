@@ -18,10 +18,9 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
 load_dotenv()
 
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "[OPENROUTER_API_KEY]")
 OPENROUTER_MODEL = "openai/gpt-4o-mini"
 
 # Hybrid weighting: rule_weight + llm_weight = 1.0
@@ -181,6 +180,7 @@ def score_compliance_rules(transcript: str) -> Tuple[float, List[str]]:
 def evaluate_with_llm(transcript: str, max_retries: int = 2) -> Dict:
     """
     Evaluate transcript using LLM with structured JSON output.
+    Falls back to neutral scores if API key is invalid or unavailable.
     
     Returns:
         {
@@ -191,46 +191,137 @@ def evaluate_with_llm(transcript: str, max_retries: int = 2) -> Dict:
             'improvements': List[str]
         }
     """
+    
+    # Check if API key is valid
+    if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "[OPENROUTER_API_KEY]":
+        print("⚠️  WARNING: OpenRouter API key not set. Using rule-based scoring only.")
+        print("💡 To use LLM evaluation, set OPENROUTER_API_KEY in .env file")
+        return {
+            'empathy_score': 10.0,
+            'professionalism_score': 10.0,
+            'compliance_score': 10.0,
+            'language_detected': 'Unknown',
+            'language_proficiency_score': None,
+            'efficiency_score': None,
+            'bias_reduction_score': None,
+            'customer_emotion': 'Unknown',
+            'sales_opportunity_score': None,
+            'violations': [],
+            'improvements': ['Set OPENROUTER_API_KEY in .env to enable LLM evaluation']
+        }
+    
     client = OpenAI(
         api_key=OPENROUTER_API_KEY,
         base_url="https://openrouter.ai/api/v1"
     )
     
-    prompt = f"""You are an expert call quality analyst. Evaluate this customer service transcript and provide scores.
+    prompt = f"""
+You are the AI evaluation engine powering an enterprise SaaS platform called EchoScore.
+
+Your job is to analyze a customer service call transcript and return a structured, objective quality evaluation.
+
+Analyze carefully and return ONLY valid JSON.
 
 TRANSCRIPT:
-{transcript[:2000]}
+{transcript[:3500]}
 
-Provide your evaluation as a JSON object with this EXACT structure:
+Return EXACTLY this JSON structure:
+
 {{
-  "empathy_score": <number 0-20>,
-  "professionalism_score": <number 0-20>,
-  "compliance_score": <number 0-20>,
-  "violations": ["violation 1", "violation 2"],
-  "improvements": ["suggestion 1", "suggestion 2"]
+  "empathy_score": number (0-20),
+  "professionalism_score": number (0-20),
+  "compliance_score": number (0-20),
+
+  "language_detected": string,
+  "language_proficiency_score": number (0-100),
+
+  "efficiency_score": number (0-100),
+  "bias_reduction_score": number (0-100),
+  "customer_emotion": string,
+  "sales_opportunity_score": number (0-100),
+
+  "violations": [string],
+  "improvements": [string]
 }}
 
-SCORING CRITERIA:
+────────────────────────
+EVALUATION CRITERIA
+────────────────────────
 
-Empathy (0-20):
-- Active listening and acknowledgment
-- Emotional validation
-- Genuine care and understanding
-- Personalized responses
+1) Empathy (0-20)
+- Acknowledges customer emotions
+- Validates concerns
+- Shows understanding
+- Expresses care or apology when appropriate
 
-Professionalism (0-20):
-- Courteous and respectful tone
+2) Professionalism (0-20)
+- Respectful tone
 - Clear articulation
-- No unprofessional language
+- No slang or profanity
 - Maintains composure
 
-Compliance (0-20):
-- Confirms customer details (order/account numbers)
+3) Compliance (0-20)
+- Confirms order/account details
 - Validates product information
-- States clear resolution/next steps
-- Documents issue properly
+- States resolution clearly
+- Provides next steps
 
-Return ONLY the JSON object, no additional text."""
+4) Language Detection
+- Detect the dominant language spoken in the transcript.
+
+5) Language Proficiency (0-100)
+Evaluate the agent's language quality:
+- Grammar accuracy
+- Sentence clarity
+- Professional vocabulary
+- Structured communication
+- Fluency and articulation
+
+6) Efficiency (0-100)
+Evaluate how efficiently the issue was handled:
+- Directness of response
+- Avoidance of repetition
+- Clear resolution path
+- Logical flow
+- Minimal unnecessary conversation
+
+7) Bias Reduction (0-100)
+Evaluate fairness and neutrality:
+- No discriminatory remarks
+- No assumptions
+- Equal treatment
+- Neutral tone
+
+8) Customer Emotion
+Classify dominant customer emotion as one of:
+Happy
+Neutral
+Frustrated
+Angry
+Confused
+
+9) Sales Opportunity (0-100)
+Evaluate:
+- Identifies upsell/cross-sell opportunities
+- Proactive value suggestions
+- Mentions upgrades or benefits
+- Recognizes opportunity signals
+
+────────────────────────
+IMPORTANT RULES
+────────────────────────
+
+- Be objective and strict.
+- Do not inflate scores.
+- Do not output explanations.
+- Do not include markdown.
+- Return ONLY raw JSON.
+- All numeric fields must be numbers.
+- Scores must stay within defined ranges.
+- If something is not present, score conservatively.
+
+Return JSON only.
+"""
 
     for attempt in range(max_retries + 1):
         try:
@@ -253,20 +344,38 @@ Return ONLY the JSON object, no additional text."""
             result = json.loads(content)
             
             # Validate required keys
-            required = ['empathy_score', 'professionalism_score', 
-                       'compliance_score', 'violations', 'improvements']
-            
-            if not all(k in result for k in required):
-                raise ValueError(f"Missing required keys. Got: {result.keys()}")
-            
-            # Validate and clamp scores
+            required = [
+                'empathy_score', 'professionalism_score', 'compliance_score',
+                'language_detected', 'language_proficiency_score',
+                'efficiency_score', 'bias_reduction_score',
+                'customer_emotion', 'sales_opportunity_score',
+                'violations', 'improvements'
+            ]
+            missing = [k for k in required if k not in result]
+            if missing:
+                raise ValueError(f"Missing required keys: {missing}")
+
+            # Validate and clamp 0-20 scores
             for key in ['empathy_score', 'professionalism_score', 'compliance_score']:
                 result[key] = max(0.0, min(20.0, float(result[key])))
-            
+
+            # Validate and clamp 0-100 scores; preserve None as None
+            for key in ['language_proficiency_score', 'efficiency_score',
+                        'bias_reduction_score', 'sales_opportunity_score']:
+                raw = result.get(key)
+                if raw is None or (isinstance(raw, float) and raw != raw):  # None or NaN
+                    result[key] = None
+                else:
+                    result[key] = max(0.0, min(100.0, float(raw)))
+
+            # Ensure string fields
+            result['language_detected'] = str(result.get('language_detected') or 'Unknown')
+            result['customer_emotion'] = str(result.get('customer_emotion') or 'Unknown')
+
             # Ensure lists
             result['violations'] = list(result['violations']) if result['violations'] else []
             result['improvements'] = list(result['improvements']) if result['improvements'] else []
-            
+
             return result
             
         except (json.JSONDecodeError, ValueError, KeyError, TypeError) as e:
@@ -282,8 +391,14 @@ Return ONLY the JSON object, no additional text."""
                     'empathy_score': 10.0,
                     'professionalism_score': 10.0,
                     'compliance_score': 10.0,
-                    'violations': ['LLM evaluation failed - used fallback scores'],
-                    'improvements': ['Unable to generate suggestions due to evaluation error']
+                    'language_detected': 'Unknown',
+                    'language_proficiency_score': None,
+                    'efficiency_score': None,
+                    'bias_reduction_score': None,
+                    'customer_emotion': 'Unknown',
+                    'sales_opportunity_score': None,
+                    'violations': [],
+                    'improvements': ['LLM evaluation unavailable - rule-based scoring used']
                 }
         
         except Exception as e:
@@ -293,8 +408,14 @@ Return ONLY the JSON object, no additional text."""
                     'empathy_score': 10.0,
                     'professionalism_score': 10.0,
                     'compliance_score': 10.0,
-                    'violations': [f'System error: {str(e)}'],
-                    'improvements': ['Unable to generate suggestions']
+                    'language_detected': 'Unknown',
+                    'language_proficiency_score': None,
+                    'efficiency_score': None,
+                    'bias_reduction_score': None,
+                    'customer_emotion': 'Unknown',
+                    'sales_opportunity_score': None,
+                    'violations': [],
+                    'improvements': ['Error contacting API - rule-based scoring used']
                 }
 
 
@@ -445,6 +566,13 @@ def evaluate_call_quality(transcript: str, verbose: bool = True) -> Dict:
         'professionalism_score': professionalism_final,
         'compliance_score': compliance_final,
         'quality_score': quality_final,
+        # LLM-only evaluated metrics (None means not evaluated)
+        'language_detected': llm_result.get('language_detected', 'Unknown'),
+        'language_proficiency_score': llm_result.get('language_proficiency_score'),
+        'efficiency_score': llm_result.get('efficiency_score'),
+        'bias_reduction_score': llm_result.get('bias_reduction_score'),
+        'customer_emotion': llm_result.get('customer_emotion', 'Unknown'),
+        'sales_opportunity_score': llm_result.get('sales_opportunity_score'),
         'violations': all_violations,
         'improvements': all_improvements,
         'breakdown': {
@@ -485,9 +613,15 @@ def print_results(result: Dict):
     
     print(f"\n📊 QUALITY SCORE: {result['quality_score']}/100 - {get_grade(result['quality_score'])}")
     print("\nDimension Scores:")
-    print(f"  • Empathy:          {result['empathy_score']}/100")
-    print(f"  • Professionalism:  {result['professionalism_score']}/100")
-    print(f"  • Compliance:       {result['compliance_score']}/100")
+    print(f"  • Empathy:             {result['empathy_score']}/100")
+    print(f"  • Professionalism:     {result['professionalism_score']}/100")
+    print(f"  • Compliance:          {result['compliance_score']}/100")
+    print(f"  • Language Proficiency:{result.get('language_proficiency_score', 'N/A')}")
+    print(f"  • Efficiency:          {result.get('efficiency_score', 'N/A')}")
+    print(f"  • Bias Reduction:      {result.get('bias_reduction_score', 'N/A')}")
+    print(f"  • Sales Opportunity:   {result.get('sales_opportunity_score', 'N/A')}")
+    print(f"\nLanguage: {result.get('language_detected', 'Unknown')}")
+    print(f"Customer Emotion: {result.get('customer_emotion', 'Unknown')}") 
     
     if result['violations']:
         print("\n⚠️  VIOLATIONS:")

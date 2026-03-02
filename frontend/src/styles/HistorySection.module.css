@@ -1,0 +1,245 @@
+.historySection {
+  animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header {
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e4dccd;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #112240;
+  letter-spacing: -1px;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #9ca3af;
+  font-weight: 600;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 60px 40px;
+  background: linear-gradient(135deg, #fffbf5 0%, #f9f7f3 100%);
+  border: 1px solid #e5e0d5;
+  border-radius: 12px;
+  border-style: dashed;
+}
+
+.emptyIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+.emptyTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.emptyText {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: 0 8px 22px rgba(17, 34, 64, 0.08);
+  border: 1px solid #e4dccd;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+}
+
+.table thead {
+  background-color: #f8f4ec;
+  border-bottom: 2px solid #e4dccd;
+}
+
+.table th {
+  padding: 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+}
+
+.table tbody tr:hover {
+  background-color: #fff9f0;
+  transform: scale(1.003);
+}
+
+.table td {
+  padding: 16px;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.thFilename {
+  width: 35%;
+}
+
+.thDate {
+  width: 25%;
+}
+
+.thScore {
+  width: 20%;
+}
+
+.thActions {
+  width: 14%;
+}
+
+.thEmotion {
+  width: 13%;
+}
+
+.thLanguage {
+  width: 13%;
+}
+
+.filename {
+  word-break: break-word;
+}
+
+.filenameText {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.date {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.scoreCell {
+  text-align: center;
+}
+
+.scoreDisplay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.scoreBadge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.scoreNumber {
+  font-weight: 600;
+  color: #112240;
+  min-width: 40px;
+  text-align: right;
+}
+
+.emotion,
+.language {
+  color: #4b5563;
+  font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+  .table {
+    font-size: 12px;
+  }
+
+  .table th,
+  .table td {
+    padding: 12px;
+  }
+
+  .thEmotion,
+  .thLanguage {
+    width: 16%;
+  }
+}
+
+@media (max-width: 768px) {
+  .historySection {
+    margin-top: 20px;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .thFilename {
+    width: 40%;
+  }
+
+  .thDate {
+    width: 18%;
+  }
+
+  .thScore {
+    width: 18%;
+  }
+
+  .thLanguage,
+  .language {
+    display: none;
+  }
+
+  .thEmotion {
+    width: 18%;
+  }
+
+  .table th,
+  .table td {
+    padding: 10px 8px;
+    font-size: 11px;
+  }
+
+  .filenameText {
+    display: block;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .emotion {
+    font-size: 11px;
+  }
+}
