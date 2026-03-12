@@ -1,112 +1,221 @@
+/* =========================================================
+   Sidebar.module.css — Dark glass navigation panel
+   ========================================================= */
+
 .sidebar {
-  width: 260px;
+  width: 256px;
   height: 100vh;
-  background-color: #f9f7f3;
-  border-right: 1px solid #e5e0d5;
+  background: linear-gradient(175deg, #080c18 0%, #0c1020 50%, #090920 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
   display: flex;
   flex-direction: column;
-  padding: 32px 20px;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.03);
+  padding: 24px 16px 20px;
   position: fixed;
   left: 0;
   top: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 100;
+  box-shadow: 2px 0 24px rgba(0, 0, 0, 0.35);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
 }
 
+/* Ambient top glow */
+.glowTop {
+  position: absolute;
+  top: -80px;
+  left: -40px;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(74, 158, 255, 0.1) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+/* ── Logo ── */
 .logo {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  padding: 4px 8px;
+  border-radius: 10px;
+  transition: background 0.2s ease;
 }
 
-.logo:hover {
-  transform: translateX(2px);
-}
+.logo:hover { background: rgba(255, 255, 255, 0.04); }
 
-.logoIcon {
-  font-size: 32px;
-  line-height: 1;
-}
+.logoIcon { font-size: 28px; line-height: 1; }
 
-.appTitle {
-  font-size: 18px;
+.logoTitle {
+  font-size: 16px;
   font-weight: 700;
-  color: #1f2937;
-  letter-spacing: -0.5px;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.3px;
 }
 
-.appSubtitle {
-  font-size: 12px;
-  color: #9ca3af;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-  flex-grow: 1;
+.logoSub {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
+  margin: 0;
+  letter-spacing: 0.4px;
 }
 
+/* ── Divider ── */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  margin: 8px 0;
+}
+
+/* ── Navigation ── */
 .nav {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  flex: 1;
-  margin-bottom: 40px;
+  gap: 4px;
+  margin-top: 8px;
 }
 
 .navItem {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: 11px;
+  padding: 11px 12px;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: 11px;
   cursor: pointer;
-  transition: all 0.2s ease;
   font-size: 14px;
   font-weight: 500;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.45);
   text-align: left;
+  position: relative;
+  overflow: hidden;
+  transition: color 0.2s ease, background 0.2s ease;
+  font-family: inherit;
+  width: 100%;
 }
 
 .navItem:hover {
-  background-color: #f0ede3;
-  color: #1f2937;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .navItem.active {
-  background-color: #f0ede3;
-  color: #1f2937;
-  border-color: #d1a574;
-  box-shadow: 0 0 0 2px rgba(209, 165, 116, 0.1);
+  color: #ffffff;
+  background: rgba(74, 158, 255, 0.12);
+  border-color: rgba(74, 158, 255, 0.22);
 }
 
-.navIcon {
-  font-size: 18px;
-  line-height: 1;
+/* Animated active indicator pill on the left */
+.activeIndicator {
+  position: absolute;
+  left: 0;
+  top: 20%;
+  height: 60%;
+  width: 3px;
+  background: linear-gradient(180deg, #4a9eff, #7c3aed);
+  border-radius: 0 3px 3px 0;
 }
 
-.navLabel {
-  font-size: 14px;
-  font-weight: 500;
-}
+.navIcon { font-size: 16px; line-height: 1; }
+.navLabel { font-size: 13.5px; }
 
+/* ── Spacer ── */
+.spacer { flex: 1; }
+
+/* ── Footer ── */
 .footer {
-  padding-top: 20px;
-  border-top: 1px solid #e5e0d5;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.userAvatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4a9eff, #7c3aed);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.userDetails { overflow: hidden; }
+
+.userName {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.82);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userRole {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(252, 165, 165, 0.85);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  font-family: inherit;
+}
+
+.logoutBtn:hover {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.35);
 }
 
 .version {
-  font-size: 12px;
-  color: #9ca3af;
-  font-weight: 600;
-  margin-bottom: 4px;
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.14);
+  text-align: center;
+  margin: 0;
 }
 
-.tagline {
-  font-size: 11px;
-  color: #d1d5db;
-  font-weight: 400;
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 64px;
+    padding: 20px 8px;
+  }
+  .logoTitle, .logoSub, .navLabel, .userDetails, .logoutBtn span:last-child, .version {
+    display: none;
+  }
+  .logo { justify-content: center; }
+  .navItem { justify-content: center; padding: 12px; }
+  .userInfo { justify-content: center; }
+  .logoutBtn { justify-content: center; }
 }

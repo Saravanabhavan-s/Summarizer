@@ -1,0 +1,16 @@
+Customer Support Compliance Policy
+
+Refund Policy:
+Customers are eligible for refunds within 7 calendar days from the purchase date if the product has not been misused. A valid invoice number and customer verification are required before processing any refund request. Unauthorized refunds are considered a compliance violation.
+
+Communication Guidelines:
+Support agents must use professional language, greet the customer properly, verify identity, and follow the approved response script. Any rude language, missing greeting, or incomplete response must be marked as a quality issue.
+
+Escalation Policy:
+If the issue cannot be resolved within the first interaction, the case must be escalated to Level 2 support. Billing, payment, and security related issues must be escalated immediately.
+
+Data Privacy Rules:
+Agents must never share passwords, OTP, credit card details, or personal information in chat or call transcripts. Any such action must be flagged as a high severity violation.
+
+Call Handling Standard:
+Every support interaction must include greeting, issue identification, resolution attempt, confirmation, and closing statement. Missing steps should reduce quality score.

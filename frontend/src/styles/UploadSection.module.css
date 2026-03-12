@@ -50,7 +50,6 @@
   line-height: 1;
   animation: float 3s ease-in-out infinite;
 }
-
 @keyframes float {
   0%,
   100% {
@@ -224,4 +223,124 @@
   .uploadIcon {
     font-size: 40px;
   }
+}
+
+/* =========================================================
+   Rocket animation states
+   ========================================================= */
+
+/* Processing state — subtle glow on drop zone */
+.dropZone.processing {
+  cursor: default;
+  border-color: #a0b4d0;
+  background: linear-gradient(135deg, #f0f6ff 0%, #eef3fb 100%);
+  box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+}
+
+/* ── Rocket stage wrapper ── */
+.rocketStage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 0;
+  min-height: 220px;
+  justify-content: center;
+}
+
+/* Phase title / sub text */
+.phaseTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #112240;
+  letter-spacing: -0.4px;
+  margin: 0;
+}
+
+.phaseSub {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ── Boosting: rocket on launchpad ── */
+.rocketPad {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.rocket {
+  font-size: 52px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 12px rgba(74, 158, 255, 0.4));
+}
+
+.padFlame {
+  width: 24px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+}
+
+.flameSpark {
+  width: 14px;
+  height: 28px;
+  border-radius: 50% 50% 30% 30%;
+  background: linear-gradient(180deg, #ff9a1a 0%, #ff4a0a 50%, transparent 100%);
+  transform-origin: top;
+  box-shadow: 0 0 10px rgba(255, 120, 20, 0.6);
+}
+
+.padBase {
+  width: 60px;
+  height: 8px;
+  background: linear-gradient(90deg, #334155, #475569, #334155);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* ── Flying: rocket in orbit ── */
+.flyingTrack {
+  width: 280px;
+  height: 90px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flyingRocket {
+  font-size: 46px;
+  line-height: 1;
+  position: relative;
+  filter: drop-shadow(0 4px 14px rgba(74, 158, 255, 0.5));
+}
+
+/* Exhaust trail behind rocket */
+.trail {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 6px;
+  background: linear-gradient(90deg, transparent, rgba(74, 158, 255, 0.6), rgba(124, 58, 237, 0.4));
+  border-radius: 3px;
+  filter: blur(2px);
+}
+
+/* ── Launched: success ── */
+.launchEmoji {
+  font-size: 52px;
+  line-height: 1;
+  position: relative;
+}
+
+.successIcon {
+  font-size: 52px;
+  line-height: 1;
+  margin-top: -16px;
 }

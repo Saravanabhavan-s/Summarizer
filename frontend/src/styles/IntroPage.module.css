@@ -1,0 +1,130 @@
+/* =========================================================
+   IntroPage.module.css — post-login brand intro animation
+   ========================================================= */
+
+.page {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(155deg, #04060c 0%, #080e20 48%, #0d0820 100%);
+  overflow: hidden;
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+}
+
+/* Subtle dot grid */
+.grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(rgba(74, 158, 255, 0.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+  pointer-events: none;
+}
+
+/* ── Centre container ── */
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  z-index: 2;
+  position: relative;
+}
+
+/* Glow rings around icon */
+.rings {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.ring1,
+.ring2,
+.ring3 {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(74, 158, 255, 0.22);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ring1 { width: 120px; height: 120px; animation: ringPulse 2.8s ease-in-out infinite; }
+.ring2 { width: 170px; height: 170px; animation: ringPulse 2.8s ease-in-out infinite 0.5s; border-color: rgba(124, 58, 237, 0.16); }
+.ring3 { width: 224px; height: 224px; animation: ringPulse 2.8s ease-in-out infinite 1s;  border-color: rgba(74, 158, 255, 0.09); }
+
+@keyframes ringPulse {
+  0%, 100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+  50%       { opacity: 0.3; transform: translate(-50%, -50%) scale(1.07); }
+}
+
+/* Icon */
+.icon {
+  font-size: 72px;
+  line-height: 1;
+  user-select: none;
+  filter: drop-shadow(0 0 28px rgba(74, 158, 255, 0.55));
+  position: relative;
+  z-index: 2;
+}
+
+/* Brand name with gradient text */
+.brandName {
+  font-size: 56px;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -2.5px;
+  background: linear-gradient(135deg, #ffffff 35%, rgba(74, 158, 255, 0.9) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  z-index: 2;
+}
+
+/* Tagline */
+.tagline {
+  font-size: 11.5px;
+  letter-spacing: 3.5px;
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 2;
+}
+
+/* Progress bar */
+.progressTrack {
+  width: 220px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 8px;
+  position: relative;
+  z-index: 2;
+}
+
+.progressFill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #4a9eff 0%, #7c3aed 100%);
+  border-radius: 2px;
+  transform-origin: left;
+  box-shadow: 0 0 10px rgba(74, 158, 255, 0.5);
+}
+
+/* Floating particles */
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(74, 158, 255, 0.55);
+  pointer-events: none;
+}

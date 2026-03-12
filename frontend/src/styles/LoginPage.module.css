@@ -1,0 +1,314 @@
+/* =========================================================
+   LoginPage.module.css — Apple iOS 17 Liquid Glass Login
+   ========================================================= */
+
+/* ─── Page shell ─────────────────────────────────────────── */
+.page {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: #04060e;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+}
+
+/* ─── Left panel ─────────────────────────────────────────── */
+.leftPanel {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+  background: linear-gradient(155deg, #04060c 0%, #080e20 45%, #0c0720 100%);
+  overflow: hidden;
+}
+
+/* Ambient glow orbs */
+.glowOrbBlue,
+.glowOrbPurple {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.glowOrbBlue {
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(
+    circle,
+    rgba(74, 158, 255, 0.15) 0%,
+    rgba(74, 158, 255, 0.04) 55%,
+    transparent 70%
+  );
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: orbPulse 5s ease-in-out infinite;
+}
+
+.glowOrbPurple {
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(
+    circle,
+    rgba(124, 58, 237, 0.12) 0%,
+    transparent 65%
+  );
+  top: 30%;
+  left: 40%;
+  transform: translate(-50%, -50%);
+  animation: orbPulse 5s ease-in-out infinite 1.5s;
+}
+
+@keyframes orbPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1);   opacity: 0.8; }
+  50%       { transform: translate(-50%, -50%) scale(1.1); opacity: 1;   }
+}
+
+/* ── Microphone with rings ── */
+.micWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.ring {
+  position: absolute;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  border: 1.5px solid rgba(74, 158, 255, 0.28);
+  animation: ringExpand 3s ease-in-out infinite var(--delay);
+}
+
+@keyframes ringExpand {
+  0%   { transform: scale(1);    opacity: 0.7; }
+  50%  { transform: scale(1.08); opacity: 0.25; }
+  100% { transform: scale(1);    opacity: 0.7; }
+}
+
+.micEmoji {
+  font-size: 52px;
+  line-height: 1;
+  z-index: 3;
+  user-select: none;
+}
+
+/* ── Waveform bars ── */
+.waveform {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 72px;
+  z-index: 2;
+}
+
+.bar {
+  width: 3px;
+  height: var(--bar-h);
+  min-height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #4a9eff 0%, #7c3aed 100%);
+  animation: barPulse 1.5s ease-in-out infinite alternate;
+  opacity: 0.82;
+  transform-origin: center;
+}
+
+@keyframes barPulse {
+  0%   { transform: scaleY(0.18); opacity: 0.35; }
+  100% { transform: scaleY(1);    opacity: 0.92; }
+}
+
+/* ── Branding ── */
+.branding {
+  text-align: center;
+  z-index: 2;
+}
+
+.brandName {
+  font-size: 30px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+  margin: 0 0 6px;
+}
+
+.brandLine {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.38);
+  margin: 0;
+  letter-spacing: 0.6px;
+}
+
+/* ─── Right panel ─────────────────────────────────────────── */
+.rightPanel {
+  width: 460px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.018);
+  padding: 40px 32px;
+}
+
+/* Glass card */
+.glassCard {
+  width: 100%;
+  max-width: 390px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(28px) saturate(160%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.115);
+  border-radius: 26px;
+  padding: 42px 38px;
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.45),
+    0 1px 0 rgba(255, 255, 255, 0.07) inset;
+}
+
+.cardHead {
+  margin-bottom: 34px;
+}
+
+.logoMark {
+  display: block;
+  font-size: 30px;
+  margin-bottom: 18px;
+}
+
+.title {
+  font-size: 27px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 8px;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.42);
+  margin: 0;
+}
+
+/* ── Form ── */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.65);
+  letter-spacing: 0.2px;
+}
+
+.input {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.075);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  font-size: 15px;
+  color: #ffffff;
+  outline: none;
+  transition: background 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.input::placeholder {
+  color: rgba(255, 255, 255, 0.22);
+}
+
+.input:focus {
+  background: rgba(74, 158, 255, 0.11);
+  border-color: rgba(74, 158, 255, 0.48);
+  box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.13);
+}
+
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.errorMsg {
+  background: rgba(239, 68, 68, 0.14);
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #fca5a5;
+  overflow: hidden;
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #4a9eff 0%, #7c3aed 100%);
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  transition: box-shadow 0.22s ease, opacity 0.22s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 4px;
+  box-shadow: 0 4px 22px rgba(74, 158, 255, 0.32);
+  letter-spacing: 0.2px;
+  font-family: inherit;
+}
+
+.submitBtn:hover:not(:disabled) {
+  box-shadow: 0 6px 30px rgba(74, 158, 255, 0.48);
+}
+
+.submitBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  animation: spin 0.65s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.hint {
+  margin-top: 24px;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.18);
+  text-align: center;
+}
+
+/* ─── Responsive ─────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .page { flex-direction: column; }
+  .leftPanel { flex: none; height: 240px; gap: 20px; }
+  .waveform { height: 50px; }
+  .micEmoji { font-size: 38px; }
+  .rightPanel { width: 100%; flex: 1; padding: 24px 20px; }
+  .glassCard { padding: 30px 24px; }
+}
