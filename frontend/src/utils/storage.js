@@ -35,13 +35,15 @@ export const getLatestCallResult = () => {
 
 export const getCallResultById = (id) => {
   const history = getCallHistory();
-  return history.find(entry => entry.id === id);
+  const target = String(id);
+  return history.find((entry) => String(entry.id) === target);
 };
 
 export const deleteCallResult = (id) => {
   try {
     const history = getCallHistory();
-    const filtered = history.filter(entry => entry.id !== id);
+    const target = String(id);
+    const filtered = history.filter((entry) => String(entry.id) !== target);
     localStorage.setItem(HISTORY_KEY, JSON.stringify(filtered));
   } catch (error) {
     console.error('Error deleting call result:', error);

@@ -11,18 +11,18 @@ Architecture:
 """
 
 import os
+from datetime import datetime
+from typing import List
 
 # ---------------------------------------------------------------------------
 # 1. Imports — using latest non-deprecated LangChain packages
 # ---------------------------------------------------------------------------
-from langchain_community.document_loaders import TextLoader
 from langchain_community.vectorstores import FAISS
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.documents import Document
 
 # ---------------------------------------------------------------------------
 # 2. Configuration
@@ -54,8 +54,10 @@ LLM_TEMPERATURE = 0  # deterministic output for compliance auditing
 # RAG connection: Step 1 of Documents → Chunking → Embeddings → FAISS → Retriever → LLM
 def load_document(file_path: str):
     """Step 1 — Load the policy document from disk."""
-    loader = TextLoader(file_path, encoding="utf-8")
-    documents = loader.load()
+    with open(file_path, "r", encoding="utf-8") as f:
+        policy_text = f.read()
+
+    documents = [Document(page_content=policy_text, metadata={"source": file_path})]
     print(f"[INFO] Loaded {len(documents)} document(s) from '{file_path}'")
     return documents
 
@@ -71,13 +73,61 @@ def load_document(file_path: str):
 # RAG connection: Step 2 — chunks are passed to the embedding model and then stored in FAISS.
 def split_documents(documents, chunk_size: int = CHUNK_SIZE, chunk_overlap: int = CHUNK_OVERLAP):
     """Step 2 — Split the document into manageable chunks for embedding."""
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size,
-        chunk_overlap=chunk_overlap,
-        length_function=len,
-        separators=["\n\n", "\n", ". ", " ", ""],
-    )
-    chunks = text_splitter.split_documents(documents)
+    if chunk_size <= 0:
+        raise ValueError("chunk_size must be > 0")
+
+    if chunk_overlap < 0:
+        raise ValueError("chunk_overlap must be >= 0")
+
+    if chunk_overlap >= chunk_size:
+        # Prevent infinite loops in sliding-window chunking.
+        chunk_overlap = max(0, chunk_size // 5)
+
+    source_path = "policy.txt"
+    full_text = "\n\n".join(doc.page_content for doc in documents if doc.page_content)
+    if documents and isinstance(documents[0].metadata, dict):
+        source_path = documents[0].metadata.get("source", source_path)
+
+    full_text = full_text.replace("\r\n", "\n").strip()
+    if not full_text:
+        return []
+
+    chunk_texts: List[str] = []
+    start = 0
+    text_len = len(full_text)
+
+    while start < text_len:
+        end = min(start + chunk_size, text_len)
+
+        if end < text_len:
+            search_floor = start + max(1, chunk_size // 2)
+            breakpoints = ["\n\n", "\n", ". ", " "]
+            for marker in breakpoints:
+                bp = full_text.rfind(marker, search_floor, end)
+                if bp != -1:
+                    end = bp + len(marker)
+                    break
+
+        if end <= start:
+            end = min(start + chunk_size, text_len)
+
+        chunk = full_text[start:end].strip()
+        if chunk:
+            chunk_texts.append(chunk)
+
+        if end >= text_len:
+            break
+
+        start = max(0, end - chunk_overlap)
+
+    chunks = [
+        Document(
+            page_content=chunk_text,
+            metadata={"source": source_path, "chunk_index": idx},
+        )
+        for idx, chunk_text in enumerate(chunk_texts)
+    ]
+
     print(f"[INFO] Split into {len(chunks)} chunk(s)  (size={chunk_size}, overlap={chunk_overlap})")
     return chunks
 
@@ -92,6 +142,8 @@ def split_documents(documents, chunk_size: int = CHUNK_SIZE, chunk_overlap: int 
 #   encoding the user query at retrieval time.
 def create_embeddings(model_name: str = EMBEDDING_MODEL_NAME):
     """Step 3 — Initialise the HuggingFace embedding model."""
+    from langchain_huggingface import HuggingFaceEmbeddings
+
     embeddings = HuggingFaceEmbeddings(
         model_name=model_name,
         model_kwargs={"device": "cpu"},
@@ -208,6 +260,12 @@ def ask_query(rag_chain, query: str) -> str:
 
 # Module-level singletons (initialised on first import)
 _retriever = None
+_retriever_meta = {
+    "policy_path": POLICY_DOCUMENT_PATH,
+    "chunks": 0,
+    "vectors": 0,
+    "last_rebuild": None,
+}
 
 
 def _init_retriever():
@@ -219,12 +277,59 @@ def _init_retriever():
     if _retriever is not None:
         return _retriever
 
-    documents = load_document(POLICY_DOCUMENT_PATH)
+    documents = load_document(_retriever_meta["policy_path"])
     chunks = split_documents(documents)
     embeddings = create_embeddings()
     vector_store = build_vector_store(chunks, embeddings)
     _retriever = create_retriever(vector_store)
+    _retriever_meta["chunks"] = len(chunks)
+    _retriever_meta["vectors"] = vector_store.index.ntotal
+    _retriever_meta["last_rebuild"] = datetime.utcnow().isoformat()
     return _retriever
+
+
+def get_policy_path() -> str:
+    """Return active policy file path used by retriever."""
+    return _retriever_meta["policy_path"]
+
+
+def set_policy_path(policy_path: str) -> None:
+    """Set active policy path for future retriever rebuilds."""
+    if policy_path:
+        _retriever_meta["policy_path"] = policy_path
+
+
+def rebuild_retriever(policy_path: str = None) -> dict:
+    """
+    Force a complete retriever rebuild from the active policy file.
+    Returns rebuild metadata.
+    """
+    global _retriever
+
+    if policy_path:
+        _retriever_meta["policy_path"] = policy_path
+
+    _retriever = None
+    _init_retriever()
+    return {
+        "status": "rebuilt",
+        "policy_path": _retriever_meta["policy_path"],
+        "chunks": _retriever_meta["chunks"],
+        "vectors": _retriever_meta["vectors"],
+        "last_rebuild": _retriever_meta["last_rebuild"],
+    }
+
+
+def get_rag_status() -> dict:
+    """Return retriever status metadata for admin dashboard."""
+    return {
+        "status": "ready" if _retriever is not None else "idle",
+        "provider": "faiss",
+        "policy_path": _retriever_meta["policy_path"],
+        "chunks": _retriever_meta["chunks"],
+        "vectors": _retriever_meta["vectors"],
+        "last_rebuild": _retriever_meta["last_rebuild"],
+    }
 
 
 # Function: get_rag_response

@@ -1,16 +1,21 @@
+/* =========================================================
+   ScoreCard.module.css — Dark glass score card
+   ========================================================= */
+
 .scoreCard {
-  background: linear-gradient(135deg, #fffcf8 0%, #f8f4ec 100%);
-  border: 1px solid #e4dccd;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
   padding: 32px;
-  box-shadow: 0 4px 16px rgba(17, 34, 64, 0.06);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.5s ease;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .scoreCard:hover {
   transform: scale(1.01);
-  box-shadow: 0 12px 28px rgba(17, 34, 64, 0.1);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
 }
 
 @keyframes slideUp {
@@ -31,7 +36,7 @@
   gap: 16px;
   margin-bottom: 26px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #e4dccd;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .fileInfo {
@@ -41,7 +46,7 @@
 .label {
   font-size: 12px;
   font-weight: 700;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.4);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 4px;
@@ -50,7 +55,7 @@
 .filename {
   font-size: 16px;
   font-weight: 600;
-  color: #112240;
+  color: #ffffff;
   word-break: break-word;
   max-width: 400px;
 }
@@ -63,23 +68,23 @@
 }
 
 .metaItem {
-  background: #fffdf9;
-  border: 1px solid #eee4d3;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
   padding: 10px;
 }
 
 .metaValue {
   font-size: 14px;
   font-weight: 700;
-  color: #112240;
+  color: #ffffff;
 }
 
 .emotionBadge {
   display: inline-block;
   margin-top: 3px;
-  background: #112240;
-  color: #f4e5c7;
+  background: linear-gradient(135deg, #4a9eff, #7c3aed);
+  color: #ffffff;
   border-radius: 999px;
   padding: 4px 10px;
   font-size: 11px;
@@ -104,31 +109,32 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #fffbf5 0%, #f9f7f3 100%);
-  box-shadow: 0 8px 24px rgba(17, 34, 64, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   animation: pulse 2s ease-in-out infinite;
 }
 
 @keyframes pulse {
   0%,
   100% {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   }
   50% {
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 12px 32px rgba(74, 158, 255, 0.15);
   }
 }
 
 .scoreValue {
   font-size: 36px;
   font-weight: 800;
-  color: #112240;
+  color: #ffffff;
   line-height: 1;
 }
 
 .scoreUnit {
   font-size: 12px;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.4);
   font-weight: 600;
   margin-top: 4px;
 }
@@ -147,7 +153,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
   animation: scaleIn 0.5s ease;
 }
 
@@ -172,7 +178,7 @@
 .gradeLabel {
   font-size: 14px;
   font-weight: 700;
-  color: #112240;
+  color: #ffffff;
   text-align: center;
 }
 
@@ -181,20 +187,20 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   padding-top: 20px;
-  border-top: 1px solid #e4dccd;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .dimensionItem {
   text-align: center;
   padding: 16px;
-  background-color: #fffdf9;
-  border: 1px solid #eee4d3;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
   transition: all 0.2s ease;
 }
 
 .dimensionItem:hover {
-  background-color: #f8f4ec;
+  background: rgba(74, 158, 255, 0.06);
   transform: translateY(-2px);
 }
 
@@ -202,7 +208,7 @@
   display: block;
   font-size: 12px;
   font-weight: 700;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.45);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 8px;
@@ -212,7 +218,7 @@
   display: block;
   font-size: 24px;
   font-weight: 800;
-  color: #112240;
+  color: #ffffff;
 }
 
 @media (max-width: 768px) {

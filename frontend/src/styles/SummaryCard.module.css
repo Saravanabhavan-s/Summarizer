@@ -1,27 +1,26 @@
+/* =========================================================
+   SummaryCard.module.css — Dark glass summary
+   ========================================================= */
+
 .summaryCard {
-  background: linear-gradient(135deg, #fffdf9 0%, #f8f4ec 100%);
-  border: 1px solid #e4dccd;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
   padding: 28px;
-  box-shadow: 0 4px 16px rgba(17, 34, 64, 0.06);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   animation: slideUp 0.5s ease 0.1s both;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .summaryCard:hover {
   transform: scale(1.01);
-  box-shadow: 0 10px 24px rgba(17, 34, 64, 0.1);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
 }
 
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .header {
@@ -30,34 +29,26 @@
   gap: 12px;
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 2px solid #eee4d3;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.icon {
-  font-size: 24px;
-  line-height: 1;
-}
+.icon { font-size: 24px; line-height: 1; }
 
 .title {
   font-size: 16px;
   font-weight: 700;
-  color: #112240;
+  color: #ffffff;
   letter-spacing: -0.5px;
 }
 
 .content {
   font-size: 15px;
   line-height: 1.9;
-  color: #374151;
+  color: rgba(255, 255, 255, 0.65);
   word-break: break-word;
 }
 
 @media (max-width: 768px) {
-  .summaryCard {
-    padding: 20px;
-  }
-
-  .content {
-    font-size: 13px;
-  }
+  .summaryCard { padding: 20px; }
+  .content     { font-size: 13px; }
 }

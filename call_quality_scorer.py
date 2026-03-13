@@ -35,6 +35,83 @@ FINAL_WEIGHTS = {
     "compliance": 0.35
 }
 
+DEFAULT_OPENROUTER_MODEL = OPENROUTER_MODEL
+DEFAULT_EMPATHY_WEIGHTS = EMPATHY_WEIGHTS.copy()
+DEFAULT_PROFESSIONALISM_WEIGHTS = PROFESSIONALISM_WEIGHTS.copy()
+DEFAULT_COMPLIANCE_WEIGHTS = COMPLIANCE_WEIGHTS.copy()
+DEFAULT_FINAL_WEIGHTS = FINAL_WEIGHTS.copy()
+
+
+def _normalize_weights(weights: Dict[str, float]) -> Dict[str, float]:
+    """Normalize weights so their sum equals 1.0."""
+    total = float(sum(max(0.0, float(v)) for v in weights.values()))
+    if total <= 0:
+        raise ValueError("Weight total must be greater than 0")
+    return {k: round(max(0.0, float(v)) / total, 4) for k, v in weights.items()}
+
+
+def get_scoring_parameters() -> Dict:
+    """Return current runtime scoring configuration."""
+    return {
+        "openrouter_model": OPENROUTER_MODEL,
+        "has_api_key": bool(OPENROUTER_API_KEY and OPENROUTER_API_KEY != "[OPENROUTER_API_KEY]"),
+        "empathy_weights": EMPATHY_WEIGHTS.copy(),
+        "professionalism_weights": PROFESSIONALISM_WEIGHTS.copy(),
+        "compliance_weights": COMPLIANCE_WEIGHTS.copy(),
+        "final_weights": FINAL_WEIGHTS.copy(),
+    }
+
+
+def update_scoring_parameters(payload: Dict) -> Dict:
+    """Update runtime scoring configuration and return updated values."""
+    global OPENROUTER_MODEL, OPENROUTER_API_KEY
+
+    if "openrouter_model" in payload and payload["openrouter_model"]:
+        OPENROUTER_MODEL = str(payload["openrouter_model"]).strip()
+
+    if "openrouter_api_key" in payload:
+        value = str(payload["openrouter_api_key"] or "").strip()
+        if value:
+            OPENROUTER_API_KEY = value
+
+    if "empathy_weights" in payload and isinstance(payload["empathy_weights"], dict):
+        normalized = _normalize_weights(payload["empathy_weights"])
+        EMPATHY_WEIGHTS.update(normalized)
+
+    if "professionalism_weights" in payload and isinstance(payload["professionalism_weights"], dict):
+        normalized = _normalize_weights(payload["professionalism_weights"])
+        PROFESSIONALISM_WEIGHTS.update(normalized)
+
+    if "compliance_weights" in payload and isinstance(payload["compliance_weights"], dict):
+        normalized = _normalize_weights(payload["compliance_weights"])
+        COMPLIANCE_WEIGHTS.update(normalized)
+
+    if "final_weights" in payload and isinstance(payload["final_weights"], dict):
+        normalized = _normalize_weights(payload["final_weights"])
+        FINAL_WEIGHTS.update(normalized)
+
+    return get_scoring_parameters()
+
+
+def reset_scoring_parameters() -> Dict:
+    """Reset runtime scoring parameters to defaults."""
+    global OPENROUTER_MODEL
+    OPENROUTER_MODEL = DEFAULT_OPENROUTER_MODEL
+
+    EMPATHY_WEIGHTS.clear()
+    EMPATHY_WEIGHTS.update(DEFAULT_EMPATHY_WEIGHTS)
+
+    PROFESSIONALISM_WEIGHTS.clear()
+    PROFESSIONALISM_WEIGHTS.update(DEFAULT_PROFESSIONALISM_WEIGHTS)
+
+    COMPLIANCE_WEIGHTS.clear()
+    COMPLIANCE_WEIGHTS.update(DEFAULT_COMPLIANCE_WEIGHTS)
+
+    FINAL_WEIGHTS.clear()
+    FINAL_WEIGHTS.update(DEFAULT_FINAL_WEIGHTS)
+
+    return get_scoring_parameters()
+
 
 # ============================================================================
 # Rule-Based Scoring Functions

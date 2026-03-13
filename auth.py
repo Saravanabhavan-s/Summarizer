@@ -16,7 +16,7 @@ import os
 import jwt
 import bcrypt
 from datetime import datetime, timedelta
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 from functools import wraps
 from dataclasses import dataclass, asdict
 from fastapi import Depends, HTTPException, status, Header
@@ -31,6 +31,7 @@ JWT_ALGORITHM = "HS256"
 # In production, use a proper database (PostgreSQL, MongoDB, etc.)
 # For demo, we use in-memory storage
 USERS_DB: Dict[str, 'User'] = {}
+VALID_ROLES = {"admin", "evaluator", "user"}
 
 
 # ---------------------------------------------------------------------------
@@ -46,14 +47,20 @@ class User:
         user_id (str):        Unique user identifier (stored as username for demo)
         username (str):       Login username
         password_hash (str):  Bcrypt hashed password (never store plaintext)
-        role (str):           "admin" or "user"
+        role (str):           "admin", "evaluator", or "user"
         created_at (str):     ISO 8601 timestamp when user was created
+        blocked (bool):       True if user login is blocked by admin
+        last_login (str):     Last successful login timestamp
+        last_activity (str):  Last activity timestamp
     """
     user_id: str
     username: str
     password_hash: str
-    role: str  # "admin" or "user"
+    role: str
     created_at: str
+    blocked: bool = False
+    last_login: Optional[str] = None
+    last_activity: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------
@@ -317,7 +324,10 @@ def register_user(username: str, password: str) -> dict:
         username=username,
         password_hash=password_hash,
         role="user",  # Default role
-        created_at=datetime.utcnow().isoformat()
+        created_at=datetime.utcnow().isoformat(),
+        blocked=False,
+        last_login=None,
+        last_activity=None,
     )
 
     # Store in memory DB
@@ -367,6 +377,13 @@ def login_user(username: str, password: str) -> dict:
 
     user = USERS_DB[username]
 
+    if user.blocked:
+        return {
+            "success": False,
+            "message": "Your account is blocked. Contact admin.",
+            "token": None
+        }
+
     # Verify password
     if not verify_password(password, user.password_hash):
         return {
@@ -377,6 +394,9 @@ def login_user(username: str, password: str) -> dict:
 
     # Generate token
     token = create_token(user.user_id, user.role)
+    now = datetime.utcnow().isoformat()
+    user.last_login = now
+    user.last_activity = now
     print(f"[AUTH] User logged in: {username} (role={user.role})")
 
     return {
@@ -426,7 +446,10 @@ def create_admin_user(username: str = "admin", password: str = "admin123") -> di
         username=username,
         password_hash=password_hash,
         role="admin",
-        created_at=datetime.utcnow().isoformat()
+        created_at=datetime.utcnow().isoformat(),
+        blocked=False,
+        last_login=None,
+        last_activity=None,
     )
 
     USERS_DB[username] = admin
@@ -435,4 +458,160 @@ def create_admin_user(username: str = "admin", password: str = "admin123") -> di
     return {
         "success": True,
         "message": f"Admin user '{username}' created. Use for monitoring dashboard."
+    }
+
+
+def _user_public_dict(user: User) -> dict:
+    """Return safe user metadata for API responses (never includes password hash)."""
+    return {
+        "user_id": user.user_id,
+        "username": user.username,
+        "role": user.role,
+        "blocked": user.blocked,
+        "created_at": user.created_at,
+        "last_login": user.last_login,
+        "last_activity": user.last_activity,
+    }
+
+
+def get_user(user_id: str) -> Optional[User]:
+    """Get user by user_id."""
+    return USERS_DB.get(user_id)
+
+
+def list_users() -> List[dict]:
+    """List all users with safe metadata."""
+    users = [_user_public_dict(user) for user in USERS_DB.values()]
+    return sorted(users, key=lambda u: u["created_at"], reverse=True)
+
+
+def add_user_by_admin(username: str, password: str, role: str = "user") -> dict:
+    """Create a user with an explicit role (admin-only operation)."""
+    normalized_role = (role or "user").strip().lower()
+    if normalized_role not in VALID_ROLES:
+        return {
+            "success": False,
+            "message": f"Invalid role '{role}'. Allowed: {sorted(VALID_ROLES)}"
+        }
+
+    result = register_user(username=username, password=password)
+    if not result.get("success"):
+        return result
+
+    user = USERS_DB.get(username)
+    if user:
+        user.role = normalized_role
+
+    return {
+        "success": True,
+        "message": f"User '{username}' created with role '{normalized_role}'",
+        "user": _user_public_dict(user),
+    }
+
+
+def delete_user(user_id: str, actor_user_id: Optional[str] = None) -> dict:
+    """Delete a user by ID (prevents deleting self)."""
+    if actor_user_id and user_id == actor_user_id:
+        return {
+            "success": False,
+            "message": "Admin cannot delete their own account"
+        }
+
+    if user_id not in USERS_DB:
+        return {
+            "success": False,
+            "message": "User not found"
+        }
+
+    del USERS_DB[user_id]
+    return {
+        "success": True,
+        "message": f"User '{user_id}' deleted"
+    }
+
+
+def block_user(user_id: str) -> dict:
+    """Block a user from logging in."""
+    user = USERS_DB.get(user_id)
+    if not user:
+        return {
+            "success": False,
+            "message": "User not found"
+        }
+
+    user.blocked = True
+    return {
+        "success": True,
+        "message": f"User '{user_id}' blocked",
+        "user": _user_public_dict(user),
+    }
+
+
+def unblock_user(user_id: str) -> dict:
+    """Unblock a previously blocked user."""
+    user = USERS_DB.get(user_id)
+    if not user:
+        return {
+            "success": False,
+            "message": "User not found"
+        }
+
+    user.blocked = False
+    return {
+        "success": True,
+        "message": f"User '{user_id}' unblocked",
+        "user": _user_public_dict(user),
+    }
+
+
+def assign_role(user_id: str, role: str) -> dict:
+    """Assign a new role to a user."""
+    normalized_role = (role or "").strip().lower()
+    if normalized_role not in VALID_ROLES:
+        return {
+            "success": False,
+            "message": f"Invalid role '{role}'. Allowed: {sorted(VALID_ROLES)}"
+        }
+
+    user = USERS_DB.get(user_id)
+    if not user:
+        return {
+            "success": False,
+            "message": "User not found"
+        }
+
+    user.role = normalized_role
+    user.last_activity = datetime.utcnow().isoformat()
+    return {
+        "success": True,
+        "message": f"Role updated for '{user_id}' to '{normalized_role}'",
+        "user": _user_public_dict(user),
+    }
+
+
+def record_user_activity(user_id: str) -> None:
+    """Update the user's last_activity field if the user exists."""
+    user = USERS_DB.get(user_id)
+    if user:
+        user.last_activity = datetime.utcnow().isoformat()
+
+
+def get_user_activity(user_id: str) -> dict:
+    """Return user-level activity metadata."""
+    user = USERS_DB.get(user_id)
+    if not user:
+        return {
+            "success": False,
+            "message": "User not found"
+        }
+
+    return {
+        "success": True,
+        "user_id": user.user_id,
+        "username": user.username,
+        "role": user.role,
+        "blocked": user.blocked,
+        "created_at": user.created_at,
+        "last_login": user.last_login,
+        "last_activity": user.last_activity,
     }

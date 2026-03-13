@@ -22,6 +22,12 @@ import ResultsPage from './pages/ResultsPage';
 import HistoryPage from './pages/HistoryPage';
 import HistoryDetailPage from './pages/HistoryDetailPage';
 import ComparePage from './pages/ComparePage';
+import ReportsPage from './pages/ReportsPage';
+import AdminPage from './pages/AdminPage';
+import AdminUsersPage from './pages/AdminUsersPage';
+import AdminPolicyPage from './pages/AdminPolicyPage';
+import AdminLogsPage from './pages/AdminLogsPage';
+import AdminSettingsPage from './pages/AdminSettingsPage';
 import appStyles from './styles/App.module.css';
 
 // Dashboard shell — sidebar + scrollable main area
@@ -42,6 +48,13 @@ function DashboardLayout({ children }) {
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuth();
   return isAuthenticated ? children : <Navigate to="/login" replace />;
+}
+
+function AdminRoute({ children }) {
+  const { isAuthenticated, user } = useAuth();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (user?.role !== 'admin') return <Navigate to="/" replace />;
+  return children;
 }
 
 export default function App() {
@@ -103,6 +116,66 @@ export default function App() {
                 <PageWrapper><ComparePage /></PageWrapper>
               </DashboardLayout>
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <PageWrapper><ReportsPage /></PageWrapper>
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <DashboardLayout>
+                <PageWrapper><AdminPage /></PageWrapper>
+              </DashboardLayout>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <AdminRoute>
+              <DashboardLayout>
+                <PageWrapper><AdminUsersPage /></PageWrapper>
+              </DashboardLayout>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/policy"
+          element={
+            <AdminRoute>
+              <DashboardLayout>
+                <PageWrapper><AdminPolicyPage /></PageWrapper>
+              </DashboardLayout>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/logs"
+          element={
+            <AdminRoute>
+              <DashboardLayout>
+                <PageWrapper><AdminLogsPage /></PageWrapper>
+              </DashboardLayout>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/settings"
+          element={
+            <AdminRoute>
+              <DashboardLayout>
+                <PageWrapper><AdminSettingsPage /></PageWrapper>
+              </DashboardLayout>
+            </AdminRoute>
           }
         />
 

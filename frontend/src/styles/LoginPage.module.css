@@ -296,11 +296,32 @@
   to { transform: rotate(360deg); }
 }
 
-.hint {
+.switchText {
   margin-top: 24px;
-  font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.18);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.38);
   text-align: center;
+}
+
+.switchLink {
+  background: none;
+  border: none;
+  color: #4a9eff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  transition: color 0.2s ease;
+}
+
+.switchLink:hover {
+  color: #7c3aed;
+}
+
+.switchLink:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ─── Responsive ─────────────────────────────────────────── */

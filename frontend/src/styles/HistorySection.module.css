@@ -1,3 +1,7 @@
+/* =========================================================
+   HistorySection.module.css — Dark glass history table
+   ========================================================= */
+
 .historySection {
   animation: slideUp 0.5s ease;
 }
@@ -16,30 +20,29 @@
 .header {
   margin-bottom: 28px;
   padding-bottom: 20px;
-  border-bottom: 2px solid #e4dccd;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .title {
   font-size: 28px;
   font-weight: 800;
-  color: #112240;
+  color: #ffffff;
   letter-spacing: -1px;
   margin-bottom: 4px;
 }
 
 .subtitle {
   font-size: 13px;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.4);
   font-weight: 600;
 }
 
 .emptyState {
   text-align: center;
   padding: 60px 40px;
-  background: linear-gradient(135deg, #fffbf5 0%, #f9f7f3 100%);
-  border: 1px solid #e5e0d5;
-  border-radius: 12px;
-  border-style: dashed;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(74, 158, 255, 0.2);
+  border-radius: 14px;
 }
 
 .emptyIcon {
@@ -51,31 +54,31 @@
 .emptyTitle {
   font-size: 18px;
   font-weight: 700;
-  color: #1f2937;
+  color: #ffffff;
   margin-bottom: 8px;
 }
 
 .emptyText {
   font-size: 14px;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .tableWrapper {
   overflow-x: auto;
-  border-radius: 12px;
-  box-shadow: 0 8px 22px rgba(17, 34, 64, 0.08);
-  border: 1px solid #e4dccd;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .table thead {
-  background-color: #f8f4ec;
-  border-bottom: 2px solid #e4dccd;
+  background: rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .table th {
@@ -83,26 +86,52 @@
   text-align: left;
   font-size: 12px;
   font-weight: 700;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.45);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .table tbody tr {
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   transition: background-color 0.2s ease, transform 0.2s ease;
   cursor: pointer;
 }
 
 .table tbody tr:hover {
-  background-color: #fff9f0;
+  background: rgba(74, 158, 255, 0.06);
   transform: scale(1.003);
 }
 
 .table td {
   padding: 16px;
   font-size: 13px;
-  color: #4b5563;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.actionsCell {
+  white-space: nowrap;
+}
+
+.actionBtn {
+  border: 1px solid rgba(74, 158, 255, 0.25);
+  background: rgba(74, 158, 255, 0.08);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 6px 8px;
+  margin-right: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.actionBtn:last-child {
+  margin-right: 0;
+}
+
+.actionBtn:hover {
+  border-color: rgba(74, 158, 255, 0.45);
+  background: rgba(74, 158, 255, 0.15);
 }
 
 .thFilename {
@@ -135,11 +164,11 @@
 
 .filenameText {
   font-weight: 500;
-  color: #1f2937;
+  color: #ffffff;
 }
 
 .date {
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.4);
   font-size: 12px;
 }
 
@@ -169,14 +198,14 @@
 
 .scoreNumber {
   font-weight: 600;
-  color: #112240;
+  color: #ffffff;
   min-width: 40px;
   text-align: right;
 }
 
 .emotion,
 .language {
-  color: #4b5563;
+  color: rgba(255, 255, 255, 0.6);
   font-weight: 600;
 }
 
@@ -193,6 +222,10 @@
   .thEmotion,
   .thLanguage {
     width: 16%;
+  }
+
+  .actionsCell {
+    min-width: 220px;
   }
 }
 
@@ -220,6 +253,11 @@
   .thLanguage,
   .language {
     display: none;
+  }
+
+  .thActions,
+  .actionsCell {
+    display: table-cell;
   }
 
   .thEmotion {

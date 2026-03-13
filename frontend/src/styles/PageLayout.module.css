@@ -1,7 +1,11 @@
+/* =========================================================
+   PageLayout.module.css — Dark glass page layout
+   ========================================================= */
+
 .page {
   min-height: 100vh;
   padding: 24px;
-  background: #F8F6F1;
+  background: transparent;
   animation: fadeIn 0.35s ease;
 }
 
@@ -10,10 +14,14 @@
   overflow: hidden;
   max-width: 1200px;
   margin: 0 auto;
-  background: #fbfaf7;
-  border: 1px solid #e6e1d7;
-  border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(17, 34, 64, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.35),
+    0 1px 0 rgba(255, 255, 255, 0.05) inset;
   padding: 24px;
 }
 
@@ -22,12 +30,12 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.18;
+  opacity: 0.12;
   background-image:
-    radial-gradient(120px 28px at 8% 12%, rgba(11, 31, 59, 0.08) 0, rgba(11, 31, 59, 0) 70%),
-    radial-gradient(150px 36px at 28% 18%, rgba(198, 168, 79, 0.08) 0, rgba(198, 168, 79, 0) 70%),
-    radial-gradient(130px 28px at 58% 16%, rgba(11, 31, 59, 0.07) 0, rgba(11, 31, 59, 0) 70%),
-    radial-gradient(150px 34px at 82% 11%, rgba(198, 168, 79, 0.07) 0, rgba(198, 168, 79, 0) 70%);
+    radial-gradient(120px 28px at 8% 12%, rgba(74, 158, 255, 0.12) 0, transparent 70%),
+    radial-gradient(150px 36px at 28% 18%, rgba(124, 58, 237, 0.1) 0, transparent 70%),
+    radial-gradient(130px 28px at 58% 16%, rgba(74, 158, 255, 0.08) 0, transparent 70%),
+    radial-gradient(150px 34px at 82% 11%, rgba(124, 58, 237, 0.08) 0, transparent 70%);
 }
 
 .panel > * {
@@ -45,68 +53,69 @@
 
 .title {
   font-size: 28px;
-  color: #0B1F3B;
+  color: #ffffff;
   letter-spacing: -0.02em;
   margin-bottom: 4px;
 }
 
 .tagline {
-  color: #C6A84F;
+  color: var(--accent-blue);
   font-size: 13px;
   font-weight: 700;
   margin-bottom: 8px;
 }
 
 .subtitle {
-  color: #5b6472;
+  color: rgba(255, 255, 255, 0.5);
   font-size: 14px;
 }
 
 .backButton {
-  border: 1px solid #C6A84F;
-  background: #fffaf1;
-  color: #0B1F3B;
+  border: 1px solid rgba(74, 158, 255, 0.3);
+  background: rgba(74, 158, 255, 0.1);
+  color: #ffffff;
   font-weight: 600;
   border-radius: 10px;
   padding: 8px 14px;
   cursor: pointer;
   margin-bottom: 16px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .secondaryButton {
-  border: 1px solid #C6A84F;
-  background: #fffaf1;
-  color: #0B1F3B;
+  border: 1px solid rgba(74, 158, 255, 0.3);
+  background: rgba(74, 158, 255, 0.1);
+  color: #ffffff;
   font-weight: 600;
   border-radius: 10px;
   padding: 10px 14px;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .backButton:hover,
 .secondaryButton:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 18px rgba(17, 34, 64, 0.08);
-  border-color: #b59638;
+  box-shadow: 0 8px 18px rgba(74, 158, 255, 0.15);
+  background: rgba(74, 158, 255, 0.18);
+  border-color: rgba(74, 158, 255, 0.45);
 }
 
 .emptyState {
-  border: 1px dashed #dbc8a4;
+  border: 1px dashed rgba(74, 158, 255, 0.2);
   border-radius: 12px;
-  background: #fffdf9;
+  background: rgba(255, 255, 255, 0.03);
   padding: 36px;
   text-align: center;
 }
 
 .emptyTitle {
-  color: #112240;
+  color: #ffffff;
   margin-bottom: 8px;
 }
 
 .emptyText {
-  color: #667084;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 @keyframes fadeIn {

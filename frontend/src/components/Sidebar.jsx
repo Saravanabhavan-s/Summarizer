@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { id: 'upload',   label: 'Upload',   icon: '📤', path: '/' },
   { id: 'history',  label: 'History',  icon: '📋', path: '/history' },
   { id: 'compare',  label: 'Compare',  icon: '⚖️',  path: '/compare' },
+  { id: 'reports',  label: 'Reports',  icon: '📊', path: '/reports' },
 ];
 
 const ADMIN_ITEM = { id: 'admin', label: 'Admin', icon: '🛡️', path: '/admin' };

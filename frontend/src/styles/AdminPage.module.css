@@ -1,0 +1,275 @@
+.tabBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 18px;
+}
+
+.tabBtn {
+  border: 1px solid #d8c7a1;
+  background: #fffaf1;
+  color: #0b1f3b;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tabBtnActive {
+  border-color: #c6a84f;
+  background: #f5ecd9;
+}
+
+.sectionWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.card,
+.chartCard,
+.tableCard,
+.healthCard {
+  border: 1px solid #e6e1d7;
+  border-radius: 12px;
+  background: #fffdf9;
+}
+
+.card {
+  padding: 14px;
+}
+
+.cardLabel {
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.cardValue {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  color: #112240;
+}
+
+.cardMuted {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.healthGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.healthCard {
+  padding: 14px;
+}
+
+.healthValue {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #112240;
+  text-transform: capitalize;
+}
+
+.chartCard {
+  padding: 14px;
+}
+
+.chartTitle {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0b1f3b;
+}
+
+.tableCard {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 10px 10px;
+  border-bottom: 1px solid #ece8df;
+  font-size: 12px;
+  color: #334155;
+}
+
+.table th {
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.actionsCell {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.actionsCell button,
+.inlineForm button,
+.manualForm button,
+.primaryBtn {
+  border: 1px solid #d8c7a1;
+  background: #fffaf1;
+  color: #0b1f3b;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.actionsCell button:hover,
+.inlineForm button:hover,
+.manualForm button:hover,
+.primaryBtn:hover {
+  border-color: #c6a84f;
+}
+
+.inlineForm,
+.manualForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.inlineForm input,
+.inlineForm select,
+.manualForm input,
+.manualForm select,
+.manualForm textarea,
+.textArea {
+  border: 1px solid #ded7c8;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #112240;
+  font-size: 12px;
+  padding: 8px 10px;
+}
+
+.inlineForm input,
+.inlineForm select {
+  min-width: 140px;
+}
+
+.textArea {
+  width: 100%;
+  min-height: 240px;
+  resize: vertical;
+}
+
+.manualForm textarea {
+  width: 100%;
+  min-height: 140px;
+  resize: vertical;
+}
+
+.flagGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px;
+}
+
+.list {
+  margin: 0;
+  padding-left: 18px;
+  color: #334155;
+  font-size: 12px;
+}
+
+.list li {
+  margin-bottom: 6px;
+}
+
+.flagItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #e6e1d7;
+  border-radius: 10px;
+  padding: 10px;
+  background: #fffdf9;
+  font-size: 12px;
+  color: #334155;
+}
+
+.message {
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid #e6e1d7;
+  border-radius: 10px;
+  background: #fffdf9;
+  color: #334155;
+  font-size: 12px;
+}
+
+.error {
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid #ef4444;
+  border-radius: 10px;
+  background: #fff5f5;
+  color: #991b1b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+  .cardGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .healthGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .cardGrid,
+  .flagGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .tabBtn {
+    flex: 1 1 calc(50% - 4px);
+  }
+
+  .table {
+    min-width: 620px;
+  }
+}

@@ -1,0 +1,48 @@
+/* =========================================================
+   ReportsPage.module.css — Dark glass reports
+   ========================================================= */
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.statCard,
+.chartCard {
+  background: rgba(12, 16, 32, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 16px;
+  backdrop-filter: blur(12px);
+}
+
+.label {
+  margin: 0 0 6px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.value {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.chartTitle {
+  margin: 0 0 10px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+@media (max-width: 840px) {
+  .statGrid {
+    grid-template-columns: 1fr;
+  }
+}

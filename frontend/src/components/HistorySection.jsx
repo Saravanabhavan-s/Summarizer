@@ -2,7 +2,21 @@ import React from 'react';
 import styles from '../styles/HistorySection.module.css';
 import { getGrade, getScoreColor } from '../utils/constants';
 
-export default function HistorySection({ history, onViewResult }) {
+export default function HistorySection({
+  history,
+  loading = false,
+  onViewResult,
+  onDownloadPdf,
+  onDownloadTranscript,
+}) {
+  if (loading) {
+    return (
+      <div className={styles.emptyState}>
+        <h3 className={styles.emptyTitle}>Loading history...</h3>
+      </div>
+    );
+  }
+
   if (history.length === 0) {
     return (
       <div className={styles.emptyState}>
@@ -42,6 +56,7 @@ export default function HistorySection({ history, onViewResult }) {
               <th className={styles.thScore}>Quality Score</th>
               <th className={styles.thEmotion}>Emotion</th>
               <th className={styles.thLanguage}>Language</th>
+              <th className={styles.thActions}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -82,6 +97,38 @@ export default function HistorySection({ history, onViewResult }) {
                   </td>
                   <td className={styles.emotion}>{entry.customer_emotion || 'Unknown'}</td>
                   <td className={styles.language}>{entry.language_detected || 'Unknown'}</td>
+                  <td className={styles.actionsCell}>
+                    <button
+                      type="button"
+                      className={styles.actionBtn}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onViewResult(entry.id);
+                      }}
+                    >
+                      View
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.actionBtn}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onDownloadPdf?.(entry.id);
+                      }}
+                    >
+                      Download PDF
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.actionBtn}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onDownloadTranscript?.(entry.id);
+                      }}
+                    >
+                      Download transcript
+                    </button>
+                  </td>
                 </tr>
               );
             })}

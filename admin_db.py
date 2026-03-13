@@ -12,7 +12,7 @@ This module provides:
 
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
-from typing import List, Dict
+from typing import List, Dict, Any
 from collections import defaultdict
 
 # In production, use a real database (PostgreSQL, MongoDB, etc.)
@@ -69,6 +69,35 @@ class ErrorLog:
     details: str = ""
 
 
+@dataclass
+class ScoringLog:
+    """
+    Log entry for scoring/evaluation events.
+    """
+    timestamp: str
+    user_id: str
+    result_id: str
+    filename: str
+    quality_score: float
+    empathy_score: float
+    compliance_score: float
+    efficiency_score: float
+    duration_ms: float
+    tokens_used: int = 0
+
+
+@dataclass
+class SystemLog:
+    """
+    Log entry for system-level actions.
+    """
+    timestamp: str
+    level: str
+    component: str
+    message: str
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
 # ---------------------------------------------------------------------------
 # Admin Database (In-Memory for Demo)
 # ---------------------------------------------------------------------------
@@ -94,7 +123,11 @@ class AdminDB:
         
         self.request_logs: List[RequestLog] = []
         self.error_logs: List[ErrorLog] = []
+        self.scoring_logs: List[ScoringLog] = []
+        self.system_logs: List[SystemLog] = []
         self.active_users: Dict[str, datetime] = {}  # user_id -> last activity time
+        self.api_usage_counter: Dict[str, int] = defaultdict(int)
+        self.tokens_used_total: int = 0
         self._initialized = True
     
     # -----------------------------------------------------------------------
@@ -117,7 +150,8 @@ class AdminDB:
         status_code: int,
         duration_ms: float,
         filename: str = "",
-        success: bool = True
+        success: bool = True,
+        tokens_used: int = 0,
     ) -> None:
         """
         Log an API request.
@@ -143,6 +177,9 @@ class AdminDB:
         )
         self.request_logs.append(log)
         self._record_user_activity(user_id)
+        self.api_usage_counter[endpoint] += 1
+        if tokens_used and tokens_used > 0:
+            self.tokens_used_total += int(tokens_used)
     
     # -----------------------------------------------------------------------
     # Error Logging
@@ -182,6 +219,58 @@ class AdminDB:
             details=details
         )
         self.error_logs.append(log)
+        self.log_system(
+            level="error",
+            component="api",
+            message=f"{error_type}: {message}",
+            metadata={"endpoint": endpoint, "user_id": user_id}
+        )
+
+    def log_scoring(
+        self,
+        user_id: str,
+        result_id: str,
+        filename: str,
+        quality_score: float,
+        empathy_score: float,
+        compliance_score: float,
+        efficiency_score: float,
+        duration_ms: float,
+        tokens_used: int = 0,
+    ) -> None:
+        """Log call scoring/evaluation details for admin monitoring."""
+        log = ScoringLog(
+            timestamp=datetime.utcnow().isoformat(),
+            user_id=user_id,
+            result_id=result_id,
+            filename=filename,
+            quality_score=float(quality_score or 0),
+            empathy_score=float(empathy_score or 0),
+            compliance_score=float(compliance_score or 0),
+            efficiency_score=float(efficiency_score or 0),
+            duration_ms=float(duration_ms or 0),
+            tokens_used=int(tokens_used or 0),
+        )
+        self.scoring_logs.append(log)
+        if tokens_used and tokens_used > 0:
+            self.tokens_used_total += int(tokens_used)
+
+    def log_system(
+        self,
+        level: str,
+        component: str,
+        message: str,
+        metadata: Dict[str, Any] = None,
+    ) -> None:
+        """Log system level operational events."""
+        log = SystemLog(
+            timestamp=datetime.utcnow().isoformat(),
+            level=(level or "info").lower(),
+            component=component,
+            message=message,
+            metadata=metadata or {},
+        )
+        self.system_logs.append(log)
     
     # -----------------------------------------------------------------------
     # User Activity
@@ -247,6 +336,8 @@ class AdminDB:
             "total_errors": len(self.error_logs),
             "active_user_count": len(self.active_users),
             "avg_request_duration_ms": round(avg_duration, 2),
+            "scoring_runs": len(self.scoring_logs),
+            "tokens_used": self.tokens_used_total,
             "timestamp": datetime.utcnow().isoformat()
         }
     
@@ -294,6 +385,24 @@ class AdminDB:
         """
         sorted_logs = sorted(
             self.error_logs,
+            key=lambda x: x.timestamp,
+            reverse=True
+        )
+        return [asdict(log) for log in sorted_logs[:limit]]
+
+    def get_scoring_logs(self, limit: int = 50) -> list:
+        """Get recent scoring logs."""
+        sorted_logs = sorted(
+            self.scoring_logs,
+            key=lambda x: x.timestamp,
+            reverse=True
+        )
+        return [asdict(log) for log in sorted_logs[:limit]]
+
+    def get_system_logs(self, limit: int = 100) -> list:
+        """Get recent system logs."""
+        sorted_logs = sorted(
+            self.system_logs,
             key=lambda x: x.timestamp,
             reverse=True
         )
@@ -407,6 +516,68 @@ class AdminDB:
             }
         
         return result
+
+    def get_api_usage_summary(self) -> dict:
+        """Return API usage counters and token totals."""
+        sorted_usage = sorted(
+            self.api_usage_counter.items(),
+            key=lambda item: item[1],
+            reverse=True,
+        )
+        return {
+            "requests_count": len(self.request_logs),
+            "tokens_used": self.tokens_used_total,
+            "by_endpoint": [
+                {"endpoint": endpoint, "requests": count}
+                for endpoint, count in sorted_usage
+            ],
+        }
+
+    def get_monitoring_table(self, limit: int = 100) -> list:
+        """
+        Return merged monitoring rows suitable for admin table rendering.
+        Includes request, scoring, and error events.
+        """
+        rows = []
+
+        for log in self.request_logs[-limit:]:
+            rows.append({
+                "timestamp": log.timestamp,
+                "kind": "request",
+                "source": log.endpoint,
+                "user_id": log.user_id,
+                "status": log.status_code,
+                "message": f"{log.method} {log.endpoint}",
+                "requests_count": 1,
+                "tokens_used": 0,
+            })
+
+        for log in self.scoring_logs[-limit:]:
+            rows.append({
+                "timestamp": log.timestamp,
+                "kind": "scoring",
+                "source": "echoscore",
+                "user_id": log.user_id,
+                "status": 200,
+                "message": f"Scored {log.filename} ({log.quality_score}/100)",
+                "requests_count": 0,
+                "tokens_used": log.tokens_used,
+            })
+
+        for log in self.error_logs[-limit:]:
+            rows.append({
+                "timestamp": log.timestamp,
+                "kind": "error",
+                "source": log.endpoint,
+                "user_id": log.user_id,
+                "status": 500,
+                "message": log.message,
+                "requests_count": 0,
+                "tokens_used": 0,
+            })
+
+        rows.sort(key=lambda r: r["timestamp"], reverse=True)
+        return rows[:limit]
     
     # Function: clear_logs
     # Purpose:  Reset all logs (only for testing/demo)
@@ -421,7 +592,11 @@ class AdminDB:
         """
         self.request_logs.clear()
         self.error_logs.clear()
+        self.scoring_logs.clear()
+        self.system_logs.clear()
         self.active_users.clear()
+        self.api_usage_counter.clear()
+        self.tokens_used_total = 0
 
 
 # Global singleton instance

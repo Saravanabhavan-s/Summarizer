@@ -1,0 +1,145 @@
+{
+  "admin": [
+    {
+      "id": "72b30218-4cee-452f-b093-cdb0a5ed3407",
+      "filename": "sample_calls.pdf",
+      "duration_seconds": 0,
+      "summary": "The core purpose of the call was for the customer to express dissatisfaction with Sprint's customer service and connectivity issues, while the agent repeatedly requested the customer to send a private message for further assistance. The important action item is for the customer to send a Direct Message to Sprint for resolution of their concerns.",
+      "quality_score": 39.3,
+      "empathy_score": 25.0,
+      "professionalism_score": 70.0,
+      "compliance_score": 27.3,
+      "resolution_score": 33.6,
+      "language_detected": "English",
+      "language_proficiency_score": 75.0,
+      "efficiency_score": 40.0,
+      "bias_reduction_score": 100.0,
+      "customer_emotion": "Frustrated",
+      "sales_opportunity_score": 0.0,
+      "time_taken_seconds": 6.55,
+      "report_pdf_available": false,
+      "transcript_available": true,
+      "violations": [
+        "Informal language: 'gonna'"
+      ],
+      "improvements": [
+        "Confirm order/product numbers and state clear resolution",
+        "Use more empathy phrases (e.g., 'I understand', 'I apologize')",
+        "Increase empathy by acknowledging customer frustrations more effectively.",
+        "Provide clearer next steps and resolutions to customer issues.",
+        "Improve response efficiency by reducing repetitive requests for private messages."
+      ],
+      "timestamp": "2026-03-13T09:13:43.745222",
+      "user_id": "admin",
+      "tokens_used_estimate": 930,
+      "transcript_path": "D:\\Summarizer\\generated_transcripts\\72b30218-4cee-452f-b093-cdb0a5ed3407_sample_calls.txt",
+      "report_pdf_path": "D:\\Summarizer\\generated_reports\\72b30218-4cee-452f-b093-cdb0a5ed3407_sample_calls.pdf"
+    },
+    {
+      "id": "407aac10-57bc-4402-adb0-20918cec470e",
+      "filename": "sample_calls.pdf",
+      "duration_seconds": 0,
+      "summary": "The call aimed to address the customer's connectivity issues and facilitate further assistance through a private message, but the customer expressed frustration with the service. The next step is for the customer to send a direct message to the support team for personalized help.",
+      "quality_score": 45.6,
+      "empathy_score": 25.0,
+      "professionalism_score": 75.0,
+      "compliance_score": 41.0,
+      "resolution_score": 50.5,
+      "language_detected": "English",
+      "language_proficiency_score": 75.0,
+      "efficiency_score": 60.0,
+      "bias_reduction_score": 90.0,
+      "customer_emotion": "Frustrated",
+      "sales_opportunity_score": 0.0,
+      "time_taken_seconds": 7.42,
+      "report_pdf_available": false,
+      "transcript_available": true,
+      "violations": [
+        "Informal language: 'gonna'"
+      ],
+      "improvements": [
+        "Confirm order/product numbers and state clear resolution",
+        "Use more empathy phrases (e.g., 'I understand', 'I apologize')",
+        "Increase empathy by acknowledging customer frustrations more directly.",
+        "Improve professionalism by maintaining a more respectful tone.",
+        "Provide clearer next steps and resolutions to enhance compliance."
+      ],
+      "timestamp": "2026-03-13T07:48:12.381338",
+      "user_id": "admin",
+      "tokens_used_estimate": 930,
+      "transcript_path": "D:\\Summarizer\\generated_transcripts\\407aac10-57bc-4402-adb0-20918cec470e_sample_calls.txt",
+      "report_pdf_path": "D:\\Summarizer\\generated_reports\\407aac10-57bc-4402-adb0-20918cec470e_sample_calls.pdf"
+    }
+  ],
+  "saravana": [
+    {
+      "id": "c912a97b-c2e0-4d6e-9dab-d5fcec266757",
+      "filename": "human_chat.txt",
+      "duration_seconds": 0,
+      "summary": "The call primarily revolves around discussing personal experiences and plans for the holidays, with one participant expressing excitement about traveling to Vancouver for a conference and seeking food recommendations. The next steps include the participants sharing their thoughts on various cuisines and potentially connecting over their shared interests in travel and food.",
+      "quality_score": 45.0,
+      "empathy_score": 83.0,
+      "professionalism_score": 37.5,
+      "compliance_score": 13.5,
+      "resolution_score": 41.8,
+      "language_detected": "English",
+      "language_proficiency_score": 85.0,
+      "efficiency_score": 70.0,
+      "bias_reduction_score": 100.0,
+      "customer_emotion": "Happy",
+      "sales_opportunity_score": 0.0,
+      "time_taken_seconds": 25.48,
+      "report_pdf_available": false,
+      "transcript_available": true,
+      "violations": [
+        "Profanity detected: 'hell'",
+        "Informal language: 'gonna'",
+        "Informal language: 'wanna'",
+        "Informal language: 'nah'",
+        "Informal language: 'gotta'",
+        "Aggressive tone: 'you need to'"
+      ],
+      "improvements": [
+        "Confirm order/product numbers and state clear resolution",
+        "Provide clearer next steps or resolutions.",
+        "Avoid excessive informal language."
+      ],
+      "timestamp": "2026-03-13T08:46:20.836243",
+      "user_id": "saravana",
+      "tokens_used_estimate": 29345,
+      "transcript_path": "D:\\Summarizer\\generated_transcripts\\c912a97b-c2e0-4d6e-9dab-d5fcec266757_human_chat.txt",
+      "report_pdf_path": "D:\\Summarizer\\generated_reports\\c912a97b-c2e0-4d6e-9dab-d5fcec266757_human_chat.pdf"
+    }
+  ],
+  "test": [
+    {
+      "id": "3917e236-6172-4b11-97b7-ff0c7fb78eee",
+      "filename": "call log 1.m4a",
+      "duration_seconds": 122,
+      "summary": "The call was about John Smith inquiring about the cost to update the map in his 2009 Nissan Altima, resulting in him deciding to place an order for the update at a discounted price of $49. Important next steps include processing the payment with his credit card information to complete the order.",
+      "quality_score": 68.4,
+      "empathy_score": 51.0,
+      "professionalism_score": 95.0,
+      "compliance_score": 63.0,
+      "resolution_score": 74.0,
+      "language_detected": "English",
+      "language_proficiency_score": 90.0,
+      "efficiency_score": 85.0,
+      "bias_reduction_score": 100.0,
+      "customer_emotion": "Neutral",
+      "sales_opportunity_score": 90.0,
+      "time_taken_seconds": 7.94,
+      "report_pdf_available": false,
+      "transcript_available": true,
+      "violations": [],
+      "improvements": [
+        "Confirm order/product numbers and state clear resolution",
+        "Use more empathy phrases (e.g., 'I understand', 'I apologize')"
+      ],
+      "timestamp": "2026-03-13T09:15:26.850545",
+      "user_id": "test",
+      "tokens_used_estimate": 833,
+      "transcript_path": "D:\\Summarizer\\generated_transcripts\\3917e236-6172-4b11-97b7-ff0c7fb78eee_calllog1.txt"
+    }
+  ]
+}

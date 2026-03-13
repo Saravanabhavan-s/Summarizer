@@ -1,17 +1,17 @@
 /* =========================================================
-   ComparePage.module.css — side-by-side call comparison
+   ComparePage.module.css — Dark glass comparison page
    ========================================================= */
 
 /* ── History selection grid ── */
 .pickHint {
   font-size: 14px;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.5);
   margin-bottom: 16px;
   font-weight: 500;
 }
 
 .empty {
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.35);
   font-size: 14px;
   padding: 24px 0;
   text-align: center;
@@ -25,9 +25,9 @@
 }
 
 .historyCard {
-  background: #fffdf9;
-  border: 1.5px solid #e6e1d7;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
   padding: 18px 16px;
   cursor: pointer;
   position: relative;
@@ -36,14 +36,14 @@
 }
 
 .historyCard:hover {
-  border-color: #c8b08a;
-  background: #fcf8f2;
+  border-color: rgba(74, 158, 255, 0.3);
+  background: rgba(74, 158, 255, 0.06);
 }
 
 .historyCard.cardSelected {
   border-color: var(--card-accent, #4a9eff);
-  background: rgba(74, 158, 255, 0.04);
-  box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+  background: rgba(74, 158, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.12);
 }
 
 .historyCard.cardDisabled {
@@ -64,13 +64,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
 }
 
 .cardFile {
   font-size: 13px;
   font-weight: 600;
-  color: #112240;
+  color: #ffffff;
   margin: 0 0 4px;
   white-space: nowrap;
   overflow: hidden;
@@ -79,7 +79,7 @@
 
 .cardDate {
   font-size: 11.5px;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.35);
   margin: 0 0 10px;
 }
 
@@ -99,7 +99,7 @@
 
 .cardSummary {
   font-size: 12px;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.45);
   line-height: 1.5;
   margin: 0;
 }
@@ -142,10 +142,11 @@
 
 /* ── Column ── */
 .column {
-  background: #fffdf9;
-  border: 1.5px solid #e6e1d7;
-  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
   overflow: hidden;
+  backdrop-filter: blur(12px);
 }
 
 .columnHead {
@@ -170,14 +171,14 @@
 .fileName {
   font-size: 15px;
   font-weight: 700;
-  color: #112240;
+  color: #ffffff;
   margin: 4px 0 0;
   word-break: break-all;
 }
 
 .timeStamp {
   font-size: 12px;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.35);
   margin: 0;
 }
 
@@ -185,8 +186,8 @@
 .heroScore {
   margin: 16px 20px;
   padding: 16px;
-  background: rgba(0,0,0,0.025);
-  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
   border: 1.5px solid;
   display: flex;
   align-items: center;
@@ -196,7 +197,7 @@
 .heroLabel {
   font-size: 13px;
   font-weight: 600;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .heroValue {
@@ -221,9 +222,9 @@
 }
 
 .scoreTile {
-  background: #f8f6f1;
-  border: 1px solid #e6e1d7;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
   padding: 10px 12px;
   display: flex;
   flex-direction: column;
@@ -232,7 +233,7 @@
 
 .tileLabel {
   font-size: 10.5px;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.4);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -253,7 +254,7 @@
 .chartTitle {
   font-size: 12px;
   font-weight: 700;
-  color: #112240;
+  color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin: 0 0 8px;
@@ -268,7 +269,7 @@
 .sectionLabel {
   font-size: 12px;
   font-weight: 700;
-  color: #112240;
+  color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin: 0 0 8px;
@@ -276,7 +277,7 @@
 
 .summaryText {
   font-size: 13px;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.55);
   line-height: 1.6;
   margin: 0;
 }
@@ -292,20 +293,20 @@
 
 .violation {
   font-size: 13px;
-  color: #dc2626;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 6px;
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 8px;
   padding: 6px 10px;
   line-height: 1.4;
 }
 
 .improvement {
   font-size: 13px;
-  color: #16a34a;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: 6px;
+  color: #86efac;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  border-radius: 8px;
   padding: 6px 10px;
   line-height: 1.4;
 }

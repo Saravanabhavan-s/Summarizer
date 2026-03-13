@@ -1,0 +1,55 @@
+Sample Customer Support Call Transcript
+Generated from TWCS dataset  |  20 messages  |  Demo use only
+1. AGENT
+@115712 I understand. I would like to assist you. We would need to get you into a private
+secured link to further assist.
+2. CUSTOMER
+@sprintcare and how do you propose we do that
+3. CUSTOMER
+@sprintcare I have sent several private messages and no one is responding as usual
+4. AGENT
+@115712 Please send us a Private Message so that we can further assist you. Just click
+‘Message’ at the top of your profile.
+5. CUSTOMER
+@sprintcare I did.
+6. AGENT
+@115712 Can you please send us a private message, so that I can gain further details
+about your account?
+7. CUSTOMER
+@sprintcare is the worst customer service
+8. AGENT
+@115713 This is saddening to hear. Please shoot us a DM, so that we can look into this
+for you. -KC
+9. CUSTOMER
+@sprintcare You gonna magically change your connectivity for me and my whole family ?
+■ ■
+10. AGENT
+@115713 We understand your concerns and we'd like for you to please send us a Direct
+Message, so that we can further assist you. -AA
+11. CUSTOMER
+@sprintcare Since I signed up with you....Since day 1
+12. AGENT
+@115713 H there! We'd definitely like to work with you on this, how long have you been
+experiencing this issue? -AA
+13. CUSTOMER
+
+@115714 y’all lie about your “great” connection. 5 bars LTE, still won’t load something.
+Smh.
+14. AGENT
+@115715 Please send me a private message so that I can send you the link to access
+your account. -FR
+15. CUSTOMER
+@115714 whenever I contact customer support, they tell me I have shortcode enabled on
+my account, but I have never in the 4 years I've tried https://t.co/0G98RtNxPK
+16. AGENT
+@115716 What information is incorrect? ^JK
+17. CUSTOMER
+@Ask_Spectrum Would you like me to email you a copy of one since Spectrum is not
+updating your training?
+18. AGENT
+@115716 Our department is part of the corporate office. If you're particular area has gone
+to this format, we were unawa... https://t.co/P7XCmTzPQj
+19. CUSTOMER
+@Ask_Spectrum I received this from your corporate office would you like a copy?
+20. AGENT
+@115716 No thank you. ^JK
