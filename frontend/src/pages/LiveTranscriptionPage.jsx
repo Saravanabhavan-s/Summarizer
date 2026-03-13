@@ -9,14 +9,14 @@
  *  5. After audio ends → final analysis overlay
  */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   LineChart, Line, BarChart, Bar, RadarChart, Radar,
   PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
-import { liveTranscribe, scoreLiveChunk } from '../utils/liveApi';
+import { liveTranscribe, scoreLiveChunk, saveLiveSession } from '../utils/liveApi';
 import styles from '../styles/LiveTranscriptionPage.module.css';
 
 // ─── Helpers ────────────────────────────────────────────────────
@@ -37,6 +37,14 @@ const pickReaction = (score) => {
 const sentimentEmoji = (s) =>
   s === 'positive' ? '😊' : s === 'negative' ? '😟' : '😐';
 
+const metricValue = (value) => (Number.isFinite(value) ? Number(value) : 0);
+
+const averageMetric = (items, key) => {
+  if (!items.length) return 0;
+  const total = items.reduce((sum, item) => sum + metricValue(item?.[key]), 0);
+  return Math.round(total / items.length);
+};
+
 // ─── Component ──────────────────────────────────────────────────
 export default function LiveTranscriptionPage() {
   // State
@@ -52,6 +60,8 @@ export default function LiveTranscriptionPage() {
   const [reactions, setReactions] = useState([]);
   const [showFinal, setShowFinal] = useState(false);
   const [allAlerts, setAllAlerts] = useState([]);
+  const [historySyncStatus, setHistorySyncStatus] = useState('idle');
+  const [historySyncMessage, setHistorySyncMessage] = useState('');
 
   const audioRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -59,6 +69,7 @@ export default function LiveTranscriptionPage() {
   const reactionIdRef = useRef(0);
   const processingRef = useRef(false);
   const intervalRef = useRef(null);
+  const historySavedRef = useRef(false);
 
   // ─── File upload ──────────────────────────────────────────────
   const handleFileSelect = (e) => {
@@ -73,6 +84,9 @@ export default function LiveTranscriptionPage() {
       setProcessedIdx(-1);
       setCurrentTime(0);
       setShowFinal(false);
+      setHistorySyncStatus('idle');
+      setHistorySyncMessage('');
+      historySavedRef.current = false;
       if (audioRef.current) {
         audioRef.current.src = URL.createObjectURL(f);
         audioRef.current.load();
@@ -85,6 +99,9 @@ export default function LiveTranscriptionPage() {
     if (!file) return;
     setLoading(true);
     setStatus('idle');
+    setHistorySyncStatus('idle');
+    setHistorySyncMessage('');
+    historySavedRef.current = false;
     try {
       const data = await liveTranscribe(file);
       setChunks(data.chunks || []);
@@ -215,15 +232,11 @@ export default function LiveTranscriptionPage() {
   };
 
   // ─── Computed values ──────────────────────────────────────────
-  const avgScore = scoredChunks.length
-    ? Math.round(scoredChunks.reduce((s, c) => s + (c.score || 0), 0) / scoredChunks.length)
-    : 0;
-  const avgFluency = scoredChunks.length
-    ? Math.round(scoredChunks.reduce((s, c) => s + (c.fluency || 0), 0) / scoredChunks.length)
-    : 0;
-  const avgConfidence = scoredChunks.length
-    ? Math.round(scoredChunks.reduce((s, c) => s + (c.confidence || 0), 0) / scoredChunks.length)
-    : 0;
+  const avgScore = averageMetric(scoredChunks, 'score');
+  const avgFluency = averageMetric(scoredChunks, 'fluency');
+  const avgConfidence = averageMetric(scoredChunks, 'confidence');
+  const avgClarity = averageMetric(scoredChunks, 'clarity');
+  const avgEngagement = averageMetric(scoredChunks, 'engagement');
 
   const sentimentCounts = scoredChunks.reduce((acc, c) => {
     const s = c.sentiment || 'neutral';
@@ -246,8 +259,121 @@ export default function LiveTranscriptionPage() {
   const radarData = [
     { metric: 'Fluency', score: avgFluency },
     { metric: 'Confidence', score: avgConfidence },
-    { metric: 'Score', score: avgScore },
+    { metric: 'Clarity', score: avgClarity },
+    { metric: 'Engagement', score: avgEngagement },
+    { metric: 'Overall', score: avgScore },
   ];
+
+  // Save completed live session into server history
+  useEffect(() => {
+    if (status !== 'done' || !file || !fullTranscript.trim()) return;
+    if (historySavedRef.current) return;
+
+    const persistSession = async () => {
+      historySavedRef.current = true;
+      setHistorySyncStatus('saving');
+      setHistorySyncMessage('Saving LIVE session to history...');
+
+      try {
+        const scoredByIndex = new Map(
+          scoredChunks.map((chunk, idx) => [Number(chunk.index ?? idx), chunk])
+        );
+
+        const sourceChunks = chunks.length
+          ? chunks
+          : scoredChunks.map((chunk, idx) => ({
+            index: chunk.index ?? idx,
+            time_start: chunk.time_start ?? 0,
+            time_end: chunk.time_end ?? 0,
+            text: chunk.text || '',
+          }));
+
+        const chunkScores = sourceChunks.map((chunk, idx) => {
+          const key = Number(chunk.index ?? idx);
+          const scored = scoredByIndex.get(key) || scoredChunks[idx] || {};
+          return {
+            index: key,
+            time_start: Number(chunk.time_start ?? 0),
+            time_end: Number(chunk.time_end ?? 0),
+            text: chunk.text || '',
+            score: Number.isFinite(scored.score) ? Number(scored.score) : null,
+            fluency: Number.isFinite(scored.fluency) ? Number(scored.fluency) : null,
+            confidence: Number.isFinite(scored.confidence) ? Number(scored.confidence) : null,
+            clarity: Number.isFinite(scored.clarity) ? Number(scored.clarity) : null,
+            sentiment: scored.sentiment || 'neutral',
+            engagement: Number.isFinite(scored.engagement) ? Number(scored.engagement) : null,
+            alerts: Array.isArray(scored.alerts) ? scored.alerts : [],
+          };
+        });
+
+        const normalizedAlerts = allAlerts
+          .map((alert) => ({
+            text: String(alert?.text || '').trim(),
+            chunk: Number.isFinite(alert?.chunk) ? Number(alert.chunk) : undefined,
+          }))
+          .filter((alert) => alert.text);
+
+        const reportData = {
+          overall_score: avgScore,
+          fluency: avgFluency,
+          confidence: avgConfidence,
+          clarity: avgClarity,
+          engagement: avgEngagement,
+          sentiment: dominantSentiment,
+          total_chunks: chunkScores.length,
+          chunk_scores: chunkScores,
+          alerts: normalizedAlerts,
+          charts: {
+            line: lineData,
+            bar: barData,
+            radar: radarData,
+          },
+          feedback: {
+            alerts: normalizedAlerts,
+            recommendations: [...new Set(chunkScores.flatMap((chunk) => chunk.alerts || []))].slice(0, 20),
+          },
+        };
+
+        const response = await saveLiveSession({
+          audio_name: file.name,
+          transcription: fullTranscript,
+          duration_seconds: duration,
+          chunk_scores: chunkScores,
+          alerts: normalizedAlerts,
+          report_data: reportData,
+        });
+
+        const resultId = response?.result?.id ? String(response.result.id) : '';
+        setHistorySyncStatus('saved');
+        setHistorySyncMessage(resultId ? `Saved to history (${resultId.slice(0, 8)}...)` : 'Saved to history');
+      } catch (err) {
+        historySavedRef.current = false;
+        setHistorySyncStatus('error');
+        setHistorySyncMessage(
+          err?.response?.data?.detail || err?.message || 'Failed to save live session to history'
+        );
+      }
+    };
+
+    persistSession();
+  }, [
+    status,
+    file,
+    fullTranscript,
+    duration,
+    chunks,
+    scoredChunks,
+    allAlerts,
+    avgScore,
+    avgFluency,
+    avgConfidence,
+    avgClarity,
+    avgEngagement,
+    dominantSentiment,
+    lineData,
+    barData,
+    radarData,
+  ]);
 
   // ─── Download helpers ─────────────────────────────────────────
   const downloadText = (content, filename) => {
@@ -269,6 +395,8 @@ export default function LiveTranscriptionPage() {
       overall_score: avgScore,
       fluency: avgFluency,
       confidence: avgConfidence,
+      clarity: avgClarity,
+      engagement: avgEngagement,
       dominant_sentiment: dominantSentiment,
       total_chunks: scoredChunks.length,
       chunks: scoredChunks.map((c, i) => ({
@@ -278,6 +406,8 @@ export default function LiveTranscriptionPage() {
         score: c.score,
         fluency: c.fluency,
         confidence: c.confidence,
+        clarity: c.clarity,
+        engagement: c.engagement,
         sentiment: c.sentiment,
         alerts: c.alerts,
       })),
@@ -297,10 +427,10 @@ export default function LiveTranscriptionPage() {
       <body>
       <h1>🎙️ Live Transcription Report</h1>
       <div class="score">${avgScore}/100</div>
-      <p><strong>Fluency:</strong> ${avgFluency} | <strong>Confidence:</strong> ${avgConfidence} | <strong>Sentiment:</strong> ${dominantSentiment}</p>
+      <p><strong>Fluency:</strong> ${avgFluency} | <strong>Confidence:</strong> ${avgConfidence} | <strong>Clarity:</strong> ${avgClarity} | <strong>Engagement:</strong> ${avgEngagement} | <strong>Sentiment:</strong> ${dominantSentiment}</p>
       <h2>Chunk Scores</h2>
-      <table><tr><th>#</th><th>Time</th><th>Score</th><th>Fluency</th><th>Confidence</th><th>Sentiment</th></tr>
-      ${scoredChunks.map((c, i) => `<tr><td>${i + 1}</td><td>${fmt(c.time_start)}-${fmt(c.time_end)}</td><td>${c.score}</td><td>${c.fluency}</td><td>${c.confidence}</td><td>${c.sentiment}</td></tr>`).join('')}
+      <table><tr><th>#</th><th>Time</th><th>Score</th><th>Fluency</th><th>Confidence</th><th>Clarity</th><th>Engagement</th><th>Sentiment</th></tr>
+      ${scoredChunks.map((c, i) => `<tr><td>${i + 1}</td><td>${fmt(c.time_start)}-${fmt(c.time_end)}</td><td>${c.score}</td><td>${c.fluency}</td><td>${c.confidence}</td><td>${c.clarity ?? '-'}</td><td>${c.engagement ?? '-'}</td><td>${c.sentiment}</td></tr>`).join('')}
       </table>
       <h2>Full Transcript</h2><p>${fullTranscript}</p>
       <h2>Alerts</h2><ul>${allAlerts.map(a => `<li>Chunk ${a.chunk}: ${a.text}</li>`).join('')}</ul>
@@ -420,6 +550,16 @@ export default function LiveTranscriptionPage() {
               {status === 'paused' && `⏸️ Paused at ${fmt(currentTime)}`}
               {status === 'done' && `✅ Complete — ${scoredChunks.length} chunks scored`}
             </div>
+
+            {status === 'done' && historySyncStatus !== 'idle' && (
+              <div className={`${styles.statusBar} ${
+                historySyncStatus === 'saving' ? styles.statusProcessing :
+                historySyncStatus === 'saved' ? styles.statusDone : styles.statusIdle
+              }`}>
+                {historySyncStatus === 'saving' && <><span className={styles.spinner} /> {historySyncMessage}</>}
+                {historySyncStatus !== 'saving' && historySyncMessage}
+              </div>
+            )}
           </div>
 
           {/* Transcript chunks */}
@@ -451,6 +591,12 @@ export default function LiveTranscriptionPage() {
                         Confidence: <span className={styles.chunkScoreValue}>{c.confidence}</span>
                       </span>
                       <span className={styles.chunkScoreTag}>
+                        Clarity: <span className={styles.chunkScoreValue}>{c.clarity ?? '-'}</span>
+                      </span>
+                      <span className={styles.chunkScoreTag}>
+                        Engagement: <span className={styles.chunkScoreValue}>{c.engagement ?? '-'}</span>
+                      </span>
+                      <span className={styles.chunkScoreTag}>
                         {sentimentEmoji(c.sentiment)} {c.sentiment}
                       </span>
                     </div>
@@ -477,6 +623,14 @@ export default function LiveTranscriptionPage() {
             <div className={`${styles.glassCard} ${styles.scoreCardMini}`}>
               <p className={styles.scoreLabel}>Confidence</p>
               <p className={styles.scoreValue}>{avgConfidence}</p>
+            </div>
+            <div className={`${styles.glassCard} ${styles.scoreCardMini}`}>
+              <p className={styles.scoreLabel}>Clarity</p>
+              <p className={styles.scoreValue}>{avgClarity}</p>
+            </div>
+            <div className={`${styles.glassCard} ${styles.scoreCardMini}`}>
+              <p className={styles.scoreLabel}>Engagement</p>
+              <p className={styles.scoreValue}>{avgEngagement}</p>
             </div>
             <div className={`${styles.glassCard} ${styles.scoreCardMini}`} style={{ gridColumn: '1 / -1' }}>
               <p className={styles.scoreLabel}>Sentiment</p>
@@ -638,6 +792,14 @@ export default function LiveTranscriptionPage() {
                 <p className={styles.scoreValue}>{avgConfidence}</p>
               </div>
               <div className={`${styles.glassCard} ${styles.scoreCardMini}`}>
+                <p className={styles.scoreLabel}>Clarity</p>
+                <p className={styles.scoreValue}>{avgClarity}</p>
+              </div>
+              <div className={`${styles.glassCard} ${styles.scoreCardMini}`}>
+                <p className={styles.scoreLabel}>Engagement</p>
+                <p className={styles.scoreValue}>{avgEngagement}</p>
+              </div>
+              <div className={`${styles.glassCard} ${styles.scoreCardMini}`}>
                 <p className={styles.scoreLabel}>Sentiment</p>
                 <span className={`${styles.sentimentBadge} ${
                   dominantSentiment === 'positive' ? styles.sentimentPositive :
@@ -687,6 +849,8 @@ export default function LiveTranscriptionPage() {
                       <th>Score</th>
                       <th>Fluency</th>
                       <th>Confidence</th>
+                      <th>Clarity</th>
+                      <th>Engagement</th>
                       <th>Sentiment</th>
                       <th>Text</th>
                     </tr>
@@ -699,6 +863,8 @@ export default function LiveTranscriptionPage() {
                         <td style={{ fontWeight: 700, color: c.score >= 70 ? '#86efac' : c.score >= 50 ? '#fbbf24' : '#fca5a5' }}>{c.score}</td>
                         <td>{c.fluency}</td>
                         <td>{c.confidence}</td>
+                        <td>{c.clarity ?? '-'}</td>
+                        <td>{c.engagement ?? '-'}</td>
                         <td>{sentimentEmoji(c.sentiment)} {c.sentiment}</td>
                         <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.text}</td>
                       </tr>

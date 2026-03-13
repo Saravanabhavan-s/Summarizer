@@ -29,6 +29,20 @@ export default function HistoryDetailPage() {
   }, [id]);
 
   const result = serverResult;
+  const isLiveEntry = result && (
+    String(result.source_type || '').toLowerCase() === 'live'
+    || String(result.live_tag || '').toUpperCase() === 'LIVE'
+    || result.is_live === true
+  );
+  const liveTranscript = isLiveEntry
+    ? (result.transcription || result.report_data?.transcription || '')
+    : '';
+  const liveChunkScores = isLiveEntry
+    ? (result.chunk_scores || result.report_data?.chunk_scores || [])
+    : [];
+  const liveAlerts = isLiveEntry
+    ? (result.alerts || result.report_data?.alerts || [])
+    : [];
 
   const handleDownloadPdf = async () => {
     setError('');
@@ -98,6 +112,77 @@ export default function HistoryDetailPage() {
         </div>
         {error && <p className={styles.emptyText}>{error}</p>}
         <ResultDashboard result={result} />
+
+        {isLiveEntry && (
+          <section className={styles.liveSection}>
+            <h3 className={styles.liveSectionTitle}>Live Session Details</h3>
+
+            {liveTranscript && (
+              <div className={styles.liveTranscriptBlock}>
+                <p className={styles.liveSubTitle}>Full Transcription</p>
+                <p className={styles.liveTranscript}>{liveTranscript}</p>
+              </div>
+            )}
+
+            {Array.isArray(liveChunkScores) && liveChunkScores.length > 0 && (
+              <div className={styles.liveChunkTableWrap}>
+                <p className={styles.liveSubTitle}>Chunk Scores</p>
+                <table className={styles.liveChunkTable}>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Time</th>
+                      <th>Overall</th>
+                      <th>Fluency</th>
+                      <th>Confidence</th>
+                      <th>Clarity</th>
+                      <th>Engagement</th>
+                      <th>Sentiment</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {liveChunkScores.map((chunk, index) => (
+                      <tr key={`${chunk?.index ?? index}`}> 
+                        <td>{Number.isFinite(chunk?.index) ? Number(chunk.index) + 1 : index + 1}</td>
+                        <td>
+                          {Number.isFinite(chunk?.time_start) && Number.isFinite(chunk?.time_end)
+                            ? `${Math.floor(chunk.time_start)}s - ${Math.floor(chunk.time_end)}s`
+                            : '—'}
+                        </td>
+                        <td>{Number.isFinite(chunk?.score) ? Number(chunk.score).toFixed(1) : '—'}</td>
+                        <td>{Number.isFinite(chunk?.fluency) ? Number(chunk.fluency).toFixed(1) : '—'}</td>
+                        <td>{Number.isFinite(chunk?.confidence) ? Number(chunk.confidence).toFixed(1) : '—'}</td>
+                        <td>{Number.isFinite(chunk?.clarity) ? Number(chunk.clarity).toFixed(1) : '—'}</td>
+                        <td>{Number.isFinite(chunk?.engagement) ? Number(chunk.engagement).toFixed(1) : '—'}</td>
+                        <td>{chunk?.sentiment || 'neutral'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {Array.isArray(liveAlerts) && liveAlerts.length > 0 && (
+              <div className={styles.liveAlertsBlock}>
+                <p className={styles.liveSubTitle}>Alerts</p>
+                <ul className={styles.liveAlertsList}>
+                  {liveAlerts.map((alert, index) => {
+                    const text = typeof alert === 'string' ? alert : (alert?.text || '');
+                    const chunkLabel = typeof alert === 'object' && alert?.chunk != null
+                      ? `Chunk ${alert.chunk}: `
+                      : '';
+
+                    return (
+                      <li key={`${index}-${text}`} className={styles.liveAlertItem}>
+                        {chunkLabel}{text}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+          </section>
+        )}
       </div>
     </main>
   );

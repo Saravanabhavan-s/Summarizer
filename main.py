@@ -48,6 +48,7 @@ from rag_pipeline import (
     set_policy_path,
     get_policy_path,
 )
+from live_transcription import live_router
 
 # ---------------------------------------------------------------------------
 # Authentication & Authorization
@@ -119,6 +120,29 @@ class EchoScoreRunBody(BaseModel):
     user_id: Optional[str] = None
 
 
+class LiveChunkScoreBody(BaseModel):
+    index: int
+    time_start: float = 0.0
+    time_end: float = 0.0
+    text: str
+    score: Optional[float] = None
+    fluency: Optional[float] = None
+    confidence: Optional[float] = None
+    clarity: Optional[float] = None
+    sentiment: Optional[str] = None
+    engagement: Optional[float] = None
+    alerts: List[str] = Field(default_factory=list)
+
+
+class LiveSessionCompleteBody(BaseModel):
+    audio_name: str
+    transcription: str
+    duration_seconds: float = 0.0
+    chunk_scores: List[LiveChunkScoreBody] = Field(default_factory=list)
+    alerts: List[Any] = Field(default_factory=list)
+    report_data: Dict[str, Any] = Field(default_factory=dict)
+
+
 class EchoScoreParamsBody(BaseModel):
     openrouter_model: Optional[str] = None
     openrouter_api_key: Optional[str] = None
@@ -186,6 +210,35 @@ def _estimate_tokens(text: str) -> int:
     if not text:
         return 0
     return max(1, len(text) // 4)
+
+
+def _normalize_live_alerts(alerts: List[Any]) -> List[dict]:
+    rows: List[dict] = []
+    for item in alerts or []:
+        text = ""
+        chunk = None
+
+        if isinstance(item, dict):
+            text = str(item.get("text") or "").strip()
+            chunk_value = item.get("chunk")
+            if chunk_value is not None:
+                try:
+                    chunk = int(chunk_value)
+                except (TypeError, ValueError):
+                    chunk = None
+        else:
+            text = str(item).strip()
+
+        if not text:
+            continue
+
+        row = {"text": text}
+        if chunk is not None and chunk >= 0:
+            row["chunk"] = chunk
+
+        rows.append(row)
+
+    return rows[:200]
 
 
 def _load_history_db() -> Dict[str, list]:
@@ -384,6 +437,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register live-transcription router (new feature — additive only)
+app.include_router(live_router)
+
 
 
 # ============================================================================
@@ -749,8 +806,151 @@ async def process_call(file: UploadFile = File(...), user: dict = Depends(get_cu
         if temp_path and os.path.exists(temp_path):
             try:
                 os.unlink(temp_path)
-            except:
-                pass
+            except OSError as cleanup_error:
+                admin_db.log_error(
+                    user_id,
+                    "TempFileCleanupError",
+                    f"Failed to delete temporary upload file: {temp_path}",
+                    "/process-call",
+                    str(cleanup_error),
+                )
+
+
+@app.post("/api/live-session-complete")
+async def save_live_session_complete(body: LiveSessionCompleteBody, user: dict = Depends(get_current_user)):
+    """Persist a completed live transcription session using the standard history schema."""
+    user_id = user["user_id"]
+    transcript = str(body.transcription or "").strip()
+    if not transcript:
+        raise HTTPException(status_code=400, detail="Live transcription is empty")
+
+    eval_start = time.monotonic()
+
+    try:
+        result = evaluate_call_quality(transcript, verbose=False)
+        elapsed = round(time.monotonic() - eval_start, 2)
+
+        efficiency_score = (
+            round(result["efficiency_score"], 1)
+            if result.get("efficiency_score") is not None else None
+        )
+        compliance_score = round(result["compliance_score"], 1)
+        result_id = str(uuid.uuid4())
+        filename = str(body.audio_name or "live_transcription.wav").strip() or "live_transcription.wav"
+        tokens_used = _estimate_tokens(transcript) + 400
+
+        chunk_scores = [chunk.model_dump() for chunk in body.chunk_scores]
+        alerts = _normalize_live_alerts(body.alerts)
+        report_data = dict(body.report_data or {})
+        report_data.setdefault("transcription", transcript)
+        report_data.setdefault("chunk_scores", chunk_scores)
+        report_data.setdefault("alerts", alerts)
+        report_data.setdefault("overall_score", round(result["quality_score"], 1))
+        report_data.setdefault(
+            "feedback",
+            {
+                "violations": result.get("violations", []),
+                "improvements": result.get("improvements", []),
+            },
+        )
+
+        history_entry = {
+            "id": result_id,
+            "filename": filename,
+            "duration_seconds": int(body.duration_seconds or 0),
+            "summary": summarize_transcript(transcript),
+            "quality_score": round(result["quality_score"], 1),
+            "empathy_score": round(result["empathy_score"], 1),
+            "professionalism_score": round(result["professionalism_score"], 1),
+            "compliance_score": compliance_score,
+            "resolution_score": round(
+                (compliance_score + (efficiency_score if efficiency_score is not None else compliance_score)) / 2,
+                1,
+            ),
+            "language_detected": result.get("language_detected", "Unknown"),
+            "language_proficiency_score": (
+                round(result["language_proficiency_score"], 1)
+                if result.get("language_proficiency_score") is not None else None
+            ),
+            "efficiency_score": efficiency_score,
+            "bias_reduction_score": (
+                round(result["bias_reduction_score"], 1)
+                if result.get("bias_reduction_score") is not None else None
+            ),
+            "customer_emotion": result.get("customer_emotion", "Unknown"),
+            "sales_opportunity_score": (
+                round(result["sales_opportunity_score"], 1)
+                if result.get("sales_opportunity_score") is not None else None
+            ),
+            "time_taken_seconds": elapsed,
+            "report_pdf_available": False,
+            "transcript_available": True,
+            "violations": result.get("violations", []),
+            "improvements": result.get("improvements", []),
+            "timestamp": _now_iso(),
+            "user_id": user_id,
+            "tokens_used_estimate": tokens_used,
+            "source_type": "live",
+            "live_tag": "LIVE",
+            "transcription": transcript,
+            "chunk_scores": chunk_scores,
+            "alerts": alerts,
+            "report_data": report_data,
+        }
+
+        history_entry["transcript_path"] = _save_transcript_artifact(history_entry, transcript)
+
+        if user_id not in CALL_HISTORY_DB:
+            CALL_HISTORY_DB[user_id] = []
+        CALL_HISTORY_DB[user_id].insert(0, history_entry)
+        CALL_HISTORY_DB[user_id] = CALL_HISTORY_DB[user_id][:50]
+        _save_history_db()
+        record_user_activity(user_id)
+
+        admin_db.log_request(
+            user_id=user_id,
+            endpoint="/api/live-session-complete",
+            method="POST",
+            status_code=200,
+            duration_ms=elapsed * 1000,
+            filename=filename,
+            success=True,
+            tokens_used=tokens_used,
+        )
+        admin_db.log_scoring(
+            user_id=user_id,
+            result_id=result_id,
+            filename=filename,
+            quality_score=history_entry["quality_score"],
+            empathy_score=history_entry["empathy_score"],
+            compliance_score=history_entry["compliance_score"],
+            efficiency_score=history_entry.get("efficiency_score") or 0,
+            duration_ms=elapsed * 1000,
+            tokens_used=tokens_used,
+        )
+
+        return {"success": True, "result": _public_result(history_entry)}
+
+    except HTTPException:
+        raise
+    except Exception as exc:
+        admin_db.log_error(
+            user_id,
+            type(exc).__name__,
+            str(exc),
+            "/api/live-session-complete",
+            "",
+        )
+        admin_db.log_request(
+            user_id=user_id,
+            endpoint="/api/live-session-complete",
+            method="POST",
+            status_code=500,
+            duration_ms=(time.monotonic() - eval_start) * 1000,
+            filename=str(body.audio_name or "live_transcription.wav"),
+            success=False,
+        )
+        raise HTTPException(status_code=500, detail="Failed to save live session") from exc
 
 
 # ============================================================================
@@ -1210,8 +1410,14 @@ async def admin_calls_delete(result_id: str, user: dict = Depends(require_admin)
         if p and Path(p).exists():
             try:
                 Path(p).unlink()
-            except Exception:
-                pass
+            except OSError as cleanup_error:
+                admin_db.log_error(
+                    user["user_id"],
+                    "ArtifactCleanupError",
+                    f"Failed to delete artifact for result_id={result_id}: {p}",
+                    "/admin/calls/{result_id}",
+                    str(cleanup_error),
+                )
 
     _remove_result_entry(result_id)
     admin_db.log_system("info", "calls", "Call deleted", {"result_id": result_id})

@@ -64,6 +64,11 @@ export default function HistorySection({
               const qualityScore = Number(entry.quality_score ?? 0);
               const grade = getGrade(qualityScore);
               const color = getScoreColor(qualityScore);
+              const isLiveEntry = (
+                String(entry.source_type || '').toLowerCase() === 'live'
+                || String(entry.live_tag || '').toUpperCase() === 'LIVE'
+                || entry.is_live === true
+              );
 
               return (
                 <tr
@@ -79,7 +84,10 @@ export default function HistorySection({
                   }}
                 >
                   <td className={styles.filename}>
-                    <span className={styles.filenameText}>{entry.filename}</span>
+                    <div className={styles.filenameWrap}>
+                      <span className={styles.filenameText}>{entry.filename}</span>
+                      {isLiveEntry && <span className={styles.liveBadge}>LIVE</span>}
+                    </div>
                   </td>
                   <td className={styles.date}>{formatDate(entry.timestamp)}</td>
                   <td className={styles.scoreCell}>

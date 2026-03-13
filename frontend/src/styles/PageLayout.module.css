@@ -118,6 +118,79 @@
   color: rgba(255, 255, 255, 0.45);
 }
 
+.liveSection {
+  margin-top: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 16px;
+}
+
+.liveSectionTitle {
+  color: #ffffff;
+  font-size: 18px;
+  margin: 0 0 12px;
+}
+
+.liveSubTitle {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 8px;
+}
+
+.liveTranscriptBlock,
+.liveChunkTableWrap,
+.liveAlertsBlock {
+  margin-bottom: 16px;
+}
+
+.liveTranscript {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.liveChunkTableWrap {
+  overflow-x: auto;
+}
+
+.liveChunkTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.liveChunkTable th,
+.liveChunkTable td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 8px;
+  text-align: left;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.liveChunkTable th {
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+}
+
+.liveAlertsList {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.liveAlertItem {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

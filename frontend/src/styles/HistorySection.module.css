@@ -162,9 +162,32 @@
   word-break: break-word;
 }
 
+.filenameWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .filenameText {
   font-weight: 500;
   color: #ffffff;
+}
+
+.liveBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  min-width: 38px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7f1d1d;
+  background: rgba(254, 202, 202, 0.95);
+  border: 1px solid rgba(248, 113, 113, 0.7);
 }
 
 .date {

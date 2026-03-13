@@ -50,3 +50,16 @@ export const scoreLiveChunk = async (text, chunkIndex = 0, timeStart = 0, timeEn
   );
   return response.data;
 };
+
+/**
+ * Save completed live session in server-side history
+ */
+export const saveLiveSession = async (payload) => {
+  const response = await client.post('/api/live-session-complete', payload, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeader(),
+    },
+  });
+  return response.data;
+};
