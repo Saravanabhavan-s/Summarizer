@@ -28,7 +28,9 @@ import AdminUsersPage from './pages/AdminUsersPage';
 import AdminPolicyPage from './pages/AdminPolicyPage';
 import AdminLogsPage from './pages/AdminLogsPage';
 import AdminSettingsPage from './pages/AdminSettingsPage';
+import LiveTranscriptionPage from './pages/LiveTranscriptionPage';
 import appStyles from './styles/App.module.css';
+import BottomNav from './components/BottomNav';
 
 // Dashboard shell — sidebar + scrollable main area
 function DashboardLayout({ children }) {
@@ -40,6 +42,7 @@ function DashboardLayout({ children }) {
           {children}
         </div>
       </main>
+      <BottomNav />
     </div>
   );
 }
@@ -176,6 +179,17 @@ export default function App() {
                 <PageWrapper><AdminSettingsPage /></PageWrapper>
               </DashboardLayout>
             </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/live-transcription"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <PageWrapper><LiveTranscriptionPage /></PageWrapper>
+              </DashboardLayout>
+            </ProtectedRoute>
           }
         />
 

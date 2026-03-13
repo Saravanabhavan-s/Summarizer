@@ -37,17 +37,21 @@
   }
 
   .mainContent {
-    margin-left: 64px;
+    margin-left: 0; /* sidebar is hidden on mobile */
+    width: 100%;
   }
 
   .content {
-    padding: 20px;
+    padding: 20px 16px;
     overflow-y: auto;
+    /* Bottom padding prevents content hiding behind fixed bottom nav */
+    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
   }
 }
 
 @media (max-width: 480px) {
   .content {
-    padding: 16px;
+    padding: 16px 12px;
+    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
   }
 }

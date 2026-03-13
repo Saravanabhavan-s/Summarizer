@@ -427,10 +427,19 @@ export default function AdminPage({ initialSection = 'Overview' }) {
         <p className={styles.chartTitle}>Top API Endpoints</p>
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={endpointChartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(17,34,64,0.08)" />
-            <XAxis dataKey="endpoint" tick={{ fontSize: 11 }} />
-            <YAxis />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.07)" />
+            <XAxis dataKey="endpoint" tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.45)' }} />
+            <YAxis tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.45)' }} />
+            <Tooltip
+              contentStyle={{
+                background: 'rgba(10,14,28,0.92)',
+                border: '1px solid rgba(74,158,255,0.2)',
+                borderRadius: '10px',
+                color: '#fff',
+                fontSize: '12px',
+              }}
+              cursor={{ fill: 'rgba(74,158,255,0.05)' }}
+            />
             <Bar dataKey="requests" fill="#4a9eff" radius={[8, 8, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
@@ -813,11 +822,20 @@ export default function AdminPage({ initialSection = 'Overview' }) {
         <p className={styles.chartTitle}>Score Trend</p>
         <ResponsiveContainer width="100%" height={260}>
           <LineChart data={reportTrendData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(17,34,64,0.08)" />
-            <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-            <YAxis domain={[0, 100]} />
-            <Tooltip />
-            <Line type="monotone" dataKey="avgScore" stroke="#4a9eff" strokeWidth={2.4} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.07)" />
+            <XAxis dataKey="date" tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.45)' }} />
+            <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.45)' }} />
+            <Tooltip
+              contentStyle={{
+                background: 'rgba(10,14,28,0.92)',
+                border: '1px solid rgba(74,158,255,0.2)',
+                borderRadius: '10px',
+                color: '#fff',
+                fontSize: '12px',
+              }}
+              cursor={{ stroke: 'rgba(74,158,255,0.2)' }}
+            />
+            <Line type="monotone" dataKey="avgScore" stroke="#4a9eff" strokeWidth={2.4} dot={{ fill: '#4a9eff', r: 4 }} />
           </LineChart>
         </ResponsiveContainer>
       </div>

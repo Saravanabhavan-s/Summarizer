@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { id: 'history',  label: 'History',  icon: '📋', path: '/history' },
   { id: 'compare',  label: 'Compare',  icon: '⚖️',  path: '/compare' },
   { id: 'reports',  label: 'Reports',  icon: '📊', path: '/reports' },
+  { id: 'live',     label: 'Live',     icon: '🎙️', path: '/live-transcription' },
 ];
 
 const ADMIN_ITEM = { id: 'admin', label: 'Admin', icon: '🛡️', path: '/admin' };

@@ -208,14 +208,6 @@
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .sidebar {
-    width: 64px;
-    padding: 20px 8px;
-  }
-  .logoTitle, .logoSub, .navLabel, .userDetails, .logoutBtn span:last-child, .version {
     display: none;
   }
-  .logo { justify-content: center; }
-  .navItem { justify-content: center; padding: 12px; }
-  .userInfo { justify-content: center; }
-  .logoutBtn { justify-content: center; }
 }

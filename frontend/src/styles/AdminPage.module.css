@@ -1,3 +1,10 @@
+/* =========================================================
+   AdminPage.module.css — Dark glass admin dashboard
+   Matches the login page palette: #04060e background,
+   #4a9eff / #7c3aed accents, glass cards.
+   ========================================================= */
+
+/* ── Tab Bar ── */
 .tabBar {
   display: flex;
   flex-wrap: wrap;
@@ -6,21 +13,31 @@
 }
 
 .tabBtn {
-  border: 1px solid #d8c7a1;
-  background: #fffaf1;
-  color: #0b1f3b;
-  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.55);
+  padding: 8px 14px;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  font-family: inherit;
+}
+
+.tabBtn:hover {
+  background: rgba(74, 158, 255, 0.1);
+  border-color: rgba(74, 158, 255, 0.3);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .tabBtnActive {
-  border-color: #c6a84f;
-  background: #f5ecd9;
+  border-color: rgba(74, 158, 255, 0.45);
+  background: rgba(74, 158, 255, 0.14);
+  color: #ffffff;
 }
 
+/* ── Layout containers ── */
 .sectionWrap {
   display: flex;
   flex-direction: column;
@@ -33,40 +50,54 @@
   gap: 12px;
 }
 
+/* ── Cards ── */
 .card,
 .chartCard,
 .tableCard,
 .healthCard {
-  border: 1px solid #e6e1d7;
-  border-radius: 12px;
-  background: #fffdf9;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover,
+.healthCard:hover {
+  border-color: rgba(74, 158, 255, 0.18);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.45);
 }
 
 .card {
-  padding: 14px;
+  padding: 16px;
 }
 
 .cardLabel {
   margin: 0 0 6px;
-  font-size: 12px;
-  color: #6b7280;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
   text-transform: uppercase;
+  letter-spacing: 0.6px;
   font-weight: 700;
 }
 
 .cardValue {
   margin: 0;
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 800;
-  color: #112240;
+  color: #ffffff;
+  letter-spacing: -1px;
 }
 
 .cardMuted {
-  margin: 0;
+  margin: 4px 0 0;
   font-size: 12px;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.35);
 }
 
+/* ── Health grid ── */
 .healthGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -79,23 +110,27 @@
 
 .healthValue {
   margin: 0 0 4px;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
-  color: #112240;
+  color: #ffffff;
   text-transform: capitalize;
 }
 
+/* ── Chart card ── */
 .chartCard {
-  padding: 14px;
+  padding: 16px;
 }
 
 .chartTitle {
-  margin: 0 0 10px;
+  margin: 0 0 12px;
   font-size: 13px;
   font-weight: 700;
-  color: #0b1f3b;
+  color: rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding-bottom: 10px;
 }
 
+/* ── Table card ── */
 .tableCard {
   overflow-x: auto;
 }
@@ -109,19 +144,30 @@
 .table th,
 .table td {
   text-align: left;
-  padding: 10px 10px;
-  border-bottom: 1px solid #ece8df;
+  padding: 11px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   font-size: 12px;
-  color: #334155;
+  color: rgba(255, 255, 255, 0.65);
 }
 
 .table th {
+  background: rgba(255, 255, 255, 0.04);
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.5px;
   font-size: 11px;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 700;
 }
 
+.table tbody tr {
+  transition: background 0.18s ease;
+}
+
+.table tbody tr:hover {
+  background: rgba(74, 158, 255, 0.06);
+}
+
+/* ── Action buttons ── */
 .actionsCell {
   display: flex;
   gap: 6px;
@@ -132,23 +178,28 @@
 .inlineForm button,
 .manualForm button,
 .primaryBtn {
-  border: 1px solid #d8c7a1;
-  background: #fffaf1;
-  color: #0b1f3b;
+  border: 1px solid rgba(74, 158, 255, 0.28);
+  background: rgba(74, 158, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
   font-size: 11px;
   font-weight: 700;
   border-radius: 8px;
   padding: 6px 10px;
   cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  font-family: inherit;
 }
 
 .actionsCell button:hover,
 .inlineForm button:hover,
 .manualForm button:hover,
 .primaryBtn:hover {
-  border-color: #c6a84f;
+  background: rgba(74, 158, 255, 0.18);
+  border-color: rgba(74, 158, 255, 0.48);
+  color: #ffffff;
 }
 
+/* ── Inline / manual forms ── */
 .inlineForm,
 .manualForm {
   display: flex;
@@ -163,17 +214,44 @@
 .manualForm select,
 .manualForm textarea,
 .textArea {
-  border: 1px solid #ded7c8;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
-  background: #ffffff;
-  color: #112240;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 12px;
   padding: 8px 10px;
+  font-family: inherit;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  outline: none;
+}
+
+.inlineForm input:focus,
+.inlineForm select:focus,
+.manualForm input:focus,
+.manualForm select:focus,
+.manualForm textarea:focus,
+.textArea:focus {
+  border-color: rgba(74, 158, 255, 0.48);
+  background: rgba(74, 158, 255, 0.1);
+}
+
+.inlineForm input::placeholder,
+.manualForm input::placeholder,
+.manualForm textarea::placeholder,
+.textArea::placeholder {
+  color: rgba(255, 255, 255, 0.25);
 }
 
 .inlineForm input,
 .inlineForm select {
   min-width: 140px;
+}
+
+/* Select option styling */
+.inlineForm select option,
+.manualForm select option {
+  background: #0c1020;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .textArea {
@@ -188,6 +266,7 @@
   resize: vertical;
 }
 
+/* ── Flag grid ── */
 .flagGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -204,7 +283,7 @@
 .list {
   margin: 0;
   padding-left: 18px;
-  color: #334155;
+  color: rgba(255, 255, 255, 0.6);
   font-size: 12px;
 }
 
@@ -212,39 +291,42 @@
   margin-bottom: 6px;
 }
 
+/* ── Flag items ── */
 .flagItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid #e6e1d7;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   padding: 10px;
-  background: #fffdf9;
+  background: rgba(255, 255, 255, 0.04);
   font-size: 12px;
-  color: #334155;
+  color: rgba(255, 255, 255, 0.65);
 }
 
+/* ── Status messages ── */
 .message {
   margin: 0;
-  padding: 8px 10px;
-  border: 1px solid #e6e1d7;
+  padding: 10px 14px;
+  border: 1px solid rgba(74, 158, 255, 0.25);
   border-radius: 10px;
-  background: #fffdf9;
-  color: #334155;
+  background: rgba(74, 158, 255, 0.08);
+  color: rgba(255, 255, 255, 0.75);
   font-size: 12px;
 }
 
 .error {
   margin: 0;
-  padding: 8px 10px;
-  border: 1px solid #ef4444;
+  padding: 10px 14px;
+  border: 1px solid rgba(239, 68, 68, 0.35);
   border-radius: 10px;
-  background: #fff5f5;
-  color: #991b1b;
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
   font-size: 12px;
   font-weight: 600;
 }
 
+/* ── Responsive ── */
 @media (max-width: 1024px) {
   .cardGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
