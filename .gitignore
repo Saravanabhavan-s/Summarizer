@@ -4,3 +4,5 @@ __pycache__/
 audio_and_txt/
 *.m4a
 make_pdf.py
+generated_transcripts/
+generated_reports/
