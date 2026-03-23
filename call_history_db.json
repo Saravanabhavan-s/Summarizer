@@ -1,6 +1,42 @@
 {
   "admin": [
     {
+      "id": "6780b489-1a08-4b90-8eb2-24394d7cb90d",
+      "filename": "human_chat.txt",
+      "duration_seconds": 0,
+      "summary": "The call primarily focused on discussing personal interests and experiences, including travel plans and favorite foods, with both parties expressing excitement about upcoming events and activities. The next steps involve potential collaboration on volunteering for a sports tournament and sharing recommendations for restaurants and travel destinations.",
+      "quality_score": 45.0,
+      "empathy_score": 83.0,
+      "professionalism_score": 37.5,
+      "compliance_score": 13.5,
+      "resolution_score": 41.8,
+      "language_detected": "English",
+      "language_proficiency_score": 85.0,
+      "efficiency_score": 70.0,
+      "bias_reduction_score": 100.0,
+      "customer_emotion": "Happy",
+      "sales_opportunity_score": 0.0,
+      "time_taken_seconds": 7.17,
+      "report_pdf_available": false,
+      "transcript_available": true,
+      "violations": [
+        "Profanity detected: 'hell'",
+        "Informal language: 'gonna'",
+        "Informal language: 'wanna'",
+        "Informal language: 'nah'",
+        "Informal language: 'gotta'",
+        "Aggressive tone: 'you need to'"
+      ],
+      "improvements": [
+        "Confirm order/product numbers and state clear resolution",
+        "Provide clearer next steps or resolutions."
+      ],
+      "timestamp": "2026-03-23T17:50:47.458808",
+      "user_id": "admin",
+      "tokens_used_estimate": 29345,
+      "transcript_path": "D:\\Summarizer\\generated_transcripts\\6780b489-1a08-4b90-8eb2-24394d7cb90d_human_chat.txt"
+    },
+    {
       "id": "e6bd77a7-a7d5-44c1-b0af-b529f7bdd8c6",
       "filename": "call_recording_15.wav",
       "duration_seconds": 23,
