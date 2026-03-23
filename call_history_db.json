@@ -1,0 +1,125 @@
+{
+  "admin": [
+    {
+      "id": "e6bd77a7-a7d5-44c1-b0af-b529f7bdd8c6",
+      "filename": "call_recording_15.wav",
+      "duration_seconds": 23,
+      "summary": "The call was to express satisfaction with the Camera Pro One, highlighting its image quality and ease of use. The next step is for Ashley Perez to recommend the product to her friends.",
+      "quality_score": 62.0,
+      "empathy_score": 60.0,
+      "professionalism_score": 100.0,
+      "compliance_score": 31.5,
+      "resolution_score": 60.8,
+      "language_detected": "English",
+      "language_proficiency_score": 95.0,
+      "efficiency_score": 90.0,
+      "bias_reduction_score": 100.0,
+      "customer_emotion": "Happy",
+      "sales_opportunity_score": 80.0,
+      "time_taken_seconds": 16.58,
+      "report_pdf_available": false,
+      "transcript_available": true,
+      "violations": [],
+      "improvements": [
+        "Use more empathy phrases (e.g., 'I understand', 'I apologize')",
+        "Agent should confirm order/account details for compliance."
+      ],
+      "timestamp": "2026-03-23T17:17:16.870228",
+      "user_id": "admin",
+      "tokens_used_estimate": 488,
+      "transcript_path": "D:\\Summarizer\\generated_transcripts\\e6bd77a7-a7d5-44c1-b0af-b529f7bdd8c6_call_recording_15.txt",
+      "report_pdf_path": "D:\\Summarizer\\generated_reports\\e6bd77a7-a7d5-44c1-b0af-b529f7bdd8c6_call_recording_15.pdf"
+    },
+    {
+      "id": "46767664-78f0-4a42-beef-61e72f7c05f7",
+      "filename": "call log 2.m4a",
+      "duration_seconds": 115,
+      "summary": "The call was to place an order for one dozen long-stemmed red roses, which will be delivered within twenty-four hours for a total of $40. Randall Thomas provided his contact information and shipping address to complete the order.",
+      "quality_score": 57.6,
+      "empathy_score": 36.0,
+      "professionalism_score": 70.0,
+      "compliance_score": 68.5,
+      "resolution_score": 76.8,
+      "language_detected": "English",
+      "language_proficiency_score": 90.0,
+      "efficiency_score": 85.0,
+      "bias_reduction_score": 100.0,
+      "customer_emotion": "Happy",
+      "sales_opportunity_score": 30.0,
+      "time_taken_seconds": 10.05,
+      "report_pdf_available": false,
+      "transcript_available": true,
+      "violations": [
+        "Profanity detected: 'hell'"
+      ],
+      "improvements": [
+        "Confirm order/product numbers and state clear resolution",
+        "Use more empathy phrases (e.g., 'I understand', 'I apologize')"
+      ],
+      "timestamp": "2026-03-23T16:30:36.154827",
+      "user_id": "admin",
+      "tokens_used_estimate": 737,
+      "transcript_path": "D:\\Summarizer\\generated_transcripts\\46767664-78f0-4a42-beef-61e72f7c05f7_calllog2.txt"
+    },
+    {
+      "id": "cf2a40e3-d9ab-4aab-9464-493e4d731bc1",
+      "filename": "call log 1.m4a",
+      "duration_seconds": 122,
+      "summary": "The call was about John Smith inquiring about the cost to update the map in his 2009 Nissan Altima, resulting in him agreeing to purchase the update for $99 after discussing the benefits of the current promotion. The next step is to process John's credit card payment to complete the order.",
+      "quality_score": 68.4,
+      "empathy_score": 51.0,
+      "professionalism_score": 95.0,
+      "compliance_score": 63.0,
+      "resolution_score": 74.0,
+      "language_detected": "English",
+      "language_proficiency_score": 90.0,
+      "efficiency_score": 85.0,
+      "bias_reduction_score": 100.0,
+      "customer_emotion": "Neutral",
+      "sales_opportunity_score": 80.0,
+      "time_taken_seconds": 11.7,
+      "report_pdf_available": false,
+      "transcript_available": true,
+      "violations": [],
+      "improvements": [
+        "Confirm order/product numbers and state clear resolution",
+        "Use more empathy phrases (e.g., 'I understand', 'I apologize')"
+      ],
+      "timestamp": "2026-03-23T16:01:30.526894",
+      "user_id": "admin",
+      "tokens_used_estimate": 833,
+      "transcript_path": "D:\\Summarizer\\generated_transcripts\\cf2a40e3-d9ab-4aab-9464-493e4d731bc1_calllog1.txt"
+    },
+    {
+      "id": "695cfa6e-1825-46bd-b648-6c8ec2585e26",
+      "filename": "call log 2.m4a",
+      "duration_seconds": 115,
+      "summary": "The call was to place an order for one dozen long-stemmed red roses, which will be shipped to Randall Thomas's address within twenty-four hours for a total of $40. Randall provided his contact information and confirmed the order details, with no additional requests made.",
+      "quality_score": 57.6,
+      "empathy_score": 36.0,
+      "professionalism_score": 70.0,
+      "compliance_score": 68.5,
+      "resolution_score": 76.8,
+      "language_detected": "English",
+      "language_proficiency_score": 90.0,
+      "efficiency_score": 85.0,
+      "bias_reduction_score": 100.0,
+      "customer_emotion": "Happy",
+      "sales_opportunity_score": 50.0,
+      "time_taken_seconds": 13.06,
+      "report_pdf_available": false,
+      "transcript_available": true,
+      "violations": [
+        "Profanity detected: 'hell'"
+      ],
+      "improvements": [
+        "Confirm order/product numbers and state clear resolution",
+        "Use more empathy phrases (e.g., 'I understand', 'I apologize')"
+      ],
+      "timestamp": "2026-03-23T16:00:08.861930",
+      "user_id": "admin",
+      "tokens_used_estimate": 737,
+      "transcript_path": "D:\\Summarizer\\generated_transcripts\\695cfa6e-1825-46bd-b648-6c8ec2585e26_calllog2.txt"
+    }
+  ]
+}

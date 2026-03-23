@@ -1,0 +1,21 @@
+services:
+
+  echoscore:
+    build: .
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - ./generated_reports:/app/generated_reports
+      - ./generated_transcripts:/app/generated_transcripts
+
+    env_file:
+      - .env
+
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - echoscore

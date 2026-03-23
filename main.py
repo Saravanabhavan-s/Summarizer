@@ -32,6 +32,9 @@ from utils.reporting import (
 )
 from transcriber import transcribe_audio, summarize_transcript
 
+# Load environment variables before importing modules that read env at import-time.
+load_dotenv()
+
 # ---------------------------------------------------------------------------
 # RAG Pipeline Import
 # ---------------------------------------------------------------------------
@@ -75,9 +78,6 @@ from auth import (
     record_user_activity,
 )
 from admin_db import admin_db
-
-# Load environment variables before reading any runtime settings.
-load_dotenv()
 
 # File-type classification
 AUDIO_EXTENSIONS = {'.mp3', '.wav', '.m4a', '.mp4', '.flac', '.ogg', '.wma', '.aac'}

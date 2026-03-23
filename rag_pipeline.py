@@ -2,11 +2,11 @@
 RAG Pipeline — Customer Support Quality Auditor
 ================================================
 Retrieval-Augmented Generation pipeline that loads company policy documents,
-indexes them with FAISS vector search, and answers compliance-related queries
+indexes them with Milvus vector search, and answers compliance-related queries
 using an LLM backed by retrieved context.
 
 Architecture:
-    Documents → Chunking → Embeddings → FAISS Vector Store
+    Documents → Chunking → Embeddings → Milvus Vector Store
     → Retriever → LLM (with context prompt) → Answer
 """
 
@@ -17,12 +17,13 @@ from typing import List
 # ---------------------------------------------------------------------------
 # 1. Imports — using latest non-deprecated LangChain packages
 # ---------------------------------------------------------------------------
-from langchain_community.vectorstores import FAISS
 from langchain_openai import ChatOpenAI
+from langchain_openai import OpenAIEmbeddings
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.documents import Document
+from pymilvus import Collection, CollectionSchema, DataType, FieldSchema, connections, utility
 
 # ---------------------------------------------------------------------------
 # 2. Configuration
@@ -31,7 +32,10 @@ from langchain_core.documents import Document
 os.environ.setdefault("OPENAI_API_KEY", "sk-YOUR-OPENAI-API-KEY-HERE")
 
 POLICY_DOCUMENT_PATH = os.path.join(os.path.dirname(__file__), "policy.txt")
-EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+EMBEDDING_MODEL_NAME = "text-embedding-3-small"
+MILVUS_URI = os.getenv("MILVUS_URI", "http://localhost:19530")
+MILVUS_COLLECTION_NAME = os.getenv("MILVUS_COLLECTION_NAME", "policy_chunks")
+MILVUS_ALIAS = os.getenv("MILVUS_ALIAS", "default")
 
 # Chunking parameters tuned for policy documents (~paragraph-level chunks)
 CHUNK_SIZE = 300
@@ -51,7 +55,7 @@ LLM_TEMPERATURE = 0  # deterministic output for compliance auditing
 # Output: list[Document] — list of LangChain Document objects with page_content and metadata
 # Why needed: This is the entry point of the RAG pipeline. The policy text must be
 #   loaded before it can be chunked, embedded, and indexed in the vector store.
-# RAG connection: Step 1 of Documents → Chunking → Embeddings → FAISS → Retriever → LLM
+# RAG connection: Step 1 of Documents → Chunking → Embeddings → Milvus → Retriever → LLM
 def load_document(file_path: str):
     """Step 1 — Load the policy document from disk."""
     with open(file_path, "r", encoding="utf-8") as f:
@@ -70,7 +74,7 @@ def load_document(file_path: str):
 # Output: list[Document] — list of chunked Document objects
 # Why needed: Embedding models have token limits and perform better on focused text.
 #   Overlapping chunks ensure that sentences at chunk boundaries are not lost.
-# RAG connection: Step 2 — chunks are passed to the embedding model and then stored in FAISS.
+# RAG connection: Step 2 — chunks are passed to the embedding model and then stored in Milvus.
 def split_documents(documents, chunk_size: int = CHUNK_SIZE, chunk_overlap: int = CHUNK_OVERLAP):
     """Step 2 — Split the document into manageable chunks for embedding."""
     if chunk_size <= 0:
@@ -133,51 +137,192 @@ def split_documents(documents, chunk_size: int = CHUNK_SIZE, chunk_overlap: int 
 
 
 # Function: create_embeddings
-# Purpose: Initialise the HuggingFace sentence-transformer embedding model
-# Input: model_name (str) — HuggingFace model identifier (default: all-MiniLM-L6-v2)
-# Output: HuggingFaceEmbeddings — embedding model instance used for vectorising text
+# Purpose: Initialise the OpenAI embedding model
+# Input: model_name (str) — OpenAI embedding model identifier
+# Output: OpenAIEmbeddings — embedding model instance used for vectorising text
 # Why needed: Embeddings convert text chunks into numerical vectors so that
-#   semantically similar text can be found via cosine similarity in FAISS.
+#   semantically similar text can be found via cosine similarity in Milvus.
 # RAG connection: Step 3 — embeddings are used both when indexing chunks and when
 #   encoding the user query at retrieval time.
 def create_embeddings(model_name: str = EMBEDDING_MODEL_NAME):
-    """Step 3 — Initialise the HuggingFace embedding model."""
-    from langchain_huggingface import HuggingFaceEmbeddings
-
-    embeddings = HuggingFaceEmbeddings(
-        model_name=model_name,
-        model_kwargs={"device": "cpu"},
-        encode_kwargs={"normalize_embeddings": True},
-    )
+    """Step 3 — Initialise the OpenAI embedding model."""
+    embeddings = OpenAIEmbeddings(model=model_name)
     print(f"[INFO] Embedding model loaded: {model_name}")
     return embeddings
 
 
+# ---------------------------------------------------------------------------
+# 4. Milvus Vector Store Layer
+# ---------------------------------------------------------------------------
+
+
+def _connect_milvus():
+    """Connect to Milvus server and return active connection alias."""
+    try:
+        connections.connect(alias=MILVUS_ALIAS, uri=MILVUS_URI)
+    except Exception as exc:
+        raise RuntimeError(
+            f"Failed to connect to Milvus at '{MILVUS_URI}'. "
+            "Ensure local Milvus (Docker) is running."
+        ) from exc
+    return MILVUS_ALIAS
+
+
+def _build_collection_schema(embedding_dim: int) -> CollectionSchema:
+    fields = [
+        FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True),
+        FieldSchema(name="vector", dtype=DataType.FLOAT_VECTOR, dim=embedding_dim),
+        FieldSchema(name="text", dtype=DataType.VARCHAR, max_length=65535),
+        FieldSchema(name="source", dtype=DataType.VARCHAR, max_length=1024),
+        FieldSchema(name="chunk_index", dtype=DataType.INT64),
+    ]
+    return CollectionSchema(fields=fields, description="Policy chunks for RAG retrieval")
+
+
+def _get_or_create_collection(embedding_dim: int, recreate: bool = False) -> Collection:
+    _connect_milvus()
+
+    exists = utility.has_collection(MILVUS_COLLECTION_NAME, using=MILVUS_ALIAS)
+    if exists and recreate:
+        utility.drop_collection(MILVUS_COLLECTION_NAME, using=MILVUS_ALIAS)
+        exists = False
+
+    if not exists:
+        schema = _build_collection_schema(embedding_dim)
+        collection = Collection(
+            name=MILVUS_COLLECTION_NAME,
+            schema=schema,
+            using=MILVUS_ALIAS,
+        )
+        create_index(collection)
+        print(f"[INFO] Milvus collection created: {MILVUS_COLLECTION_NAME}")
+    else:
+        collection = Collection(MILVUS_COLLECTION_NAME, using=MILVUS_ALIAS)
+
+    collection.load()
+    return collection
+
+
+def create_index(collection: Collection) -> None:
+    """Create a cosine index in Milvus (no-op if already present)."""
+    if collection.indexes:
+        return
+
+    collection.create_index(
+        field_name="vector",
+        index_params={
+            "metric_type": "COSINE",
+            "index_type": "AUTOINDEX",
+            "params": {},
+        },
+    )
+
+
+def add_documents(collection: Collection, chunks, embeddings) -> int:
+    """Insert chunk embeddings and metadata into Milvus collection."""
+    if not chunks:
+        return 0
+
+    texts = [doc.page_content for doc in chunks]
+    vectors = embeddings.embed_documents(texts)
+    sources = [str(doc.metadata.get("source", "")) for doc in chunks]
+    chunk_indexes = [int(doc.metadata.get("chunk_index", idx)) for idx, doc in enumerate(chunks)]
+
+    collection.insert([vectors, texts, sources, chunk_indexes])
+    collection.flush()
+    collection.load()
+    return len(texts)
+
+
+def search_documents(collection: Collection, embeddings, query: str, top_k: int = RETRIEVER_TOP_K) -> List[Document]:
+    """Search top-k similar chunks in Milvus using cosine similarity."""
+    query_vector = embeddings.embed_query(query)
+
+    hits = collection.search(
+        data=[query_vector],
+        anns_field="vector",
+        param={"metric_type": "COSINE", "params": {}},
+        limit=top_k,
+        output_fields=["text", "source", "chunk_index"],
+    )
+
+    docs: List[Document] = []
+    for hit in hits[0]:
+        entity = hit.entity
+        docs.append(
+            Document(
+                page_content=entity.get("text", ""),
+                metadata={
+                    "source": entity.get("source", ""),
+                    "chunk_index": entity.get("chunk_index", -1),
+                    "score": float(hit.score),
+                },
+            )
+        )
+    return docs
+
+
+class MilvusRetriever:
+    """Retriever interface compatible with existing pipeline usage."""
+
+    def __init__(self, collection: Collection, embeddings, top_k: int):
+        self.collection = collection
+        self.embeddings = embeddings
+        self.top_k = top_k
+
+    def invoke(self, query: str) -> List[Document]:
+        return search_documents(self.collection, self.embeddings, query, top_k=self.top_k)
+
+
+class MilvusVectorStore:
+    """Minimal vector store wrapper preserving the existing retriever interface."""
+
+    def __init__(self, collection: Collection, embeddings):
+        self.collection = collection
+        self.embeddings = embeddings
+
+    @property
+    def vector_count(self) -> int:
+        return int(self.collection.num_entities)
+
+    def as_retriever(self, search_type: str = "similarity", search_kwargs: dict = None):
+        del search_type
+        kwargs = search_kwargs or {}
+        top_k = int(kwargs.get("k", RETRIEVER_TOP_K))
+        return MilvusRetriever(self.collection, self.embeddings, top_k=top_k)
+
+
 # Function: build_vector_store
-# Purpose: Create a FAISS vector index from the embedded document chunks
+# Purpose: Create a Milvus vector index from the embedded document chunks
 # Input: chunks (list[Document]) — output from split_documents()
-#        embeddings (HuggingFaceEmbeddings) — output from create_embeddings()
-# Output: FAISS — a LangChain FAISS vector store containing all chunk vectors
-# Why needed: FAISS provides fast approximate nearest-neighbour search so the
-#   retriever can quickly find the most relevant policy sections for any query.
+#        embeddings (OpenAIEmbeddings) — output from create_embeddings()
+# Output: MilvusVectorStore — vector store wrapper over Milvus collection
+# Why needed: Milvus provides scalable nearest-neighbour search so the retriever
+#   can quickly find the most relevant policy sections for any query.
 # RAG connection: Step 4 — the vector store is the backbone of the retrieval layer.
 def build_vector_store(chunks, embeddings):
-    """Step 4 — Create a FAISS vector store from document chunks."""
-    vector_store = FAISS.from_documents(chunks, embeddings)
-    print(f"[INFO] FAISS vector store created with {vector_store.index.ntotal} vectors")
+    """Step 4 — Create a Milvus vector store from document chunks."""
+    if not chunks:
+        raise ValueError("Cannot build vector store: no chunks were provided")
+
+    probe_vector = embeddings.embed_query(chunks[0].page_content)
+    collection = _get_or_create_collection(embedding_dim=len(probe_vector), recreate=True)
+    inserted = add_documents(collection, chunks, embeddings)
+    vector_store = MilvusVectorStore(collection, embeddings)
+    print(f"[INFO] Milvus vector store ready with {vector_store.vector_count} vectors (inserted={inserted})")
     return vector_store
 
 
 # Function: create_retriever
-# Purpose: Wrap the FAISS vector store in a LangChain retriever interface
-# Input: vector_store (FAISS) — output from build_vector_store()
+# Purpose: Wrap the Milvus vector store in a retriever interface
+# Input: vector_store (MilvusVectorStore) — output from build_vector_store()
 #        top_k (int) — number of most-similar chunks to return per query
-# Output: VectorStoreRetriever — callable retriever that accepts a query string
+# Output: MilvusRetriever — callable retriever that accepts a query string
 # Why needed: The retriever is the interface the RAG chain (or the backend) calls
 #   to fetch relevant policy text before sending it to the LLM.
-# RAG connection: Step 5 — the retriever bridges FAISS and the LLM prompt.
+# RAG connection: Step 5 — the retriever bridges Milvus and the LLM prompt.
 def create_retriever(vector_store, top_k: int = RETRIEVER_TOP_K):
-    """Step 5 — Build a retriever over the FAISS vector store."""
+    """Step 5 — Build a retriever over the Milvus vector store."""
     retriever = vector_store.as_retriever(
         search_type="similarity",
         search_kwargs={"k": top_k},
@@ -201,7 +346,7 @@ def build_rag_chain(retriever, model: str = LLM_MODEL, temperature: float = LLM_
 
     This is the modern, non-deprecated replacement for the legacy RetrievalQA chain.
     The chain:
-        1. Retrieves relevant policy chunks via the FAISS retriever.
+        1. Retrieves relevant policy chunks via the Milvus retriever.
         2. Formats them into a context block.
         3. Passes context + question to the LLM via a structured prompt.
         4. Parses the LLM output to a plain string.
@@ -253,7 +398,7 @@ def ask_query(rag_chain, query: str) -> str:
 # Backend Integration — Singleton Initialisation & get_rag_response()
 # ===========================================================================
 # The objects below are initialised ONCE when this module is first imported.
-# Subsequent calls to get_rag_response() reuse the pre-built FAISS index and
+# Subsequent calls to get_rag_response() reuse the pre-built Milvus collection and
 # retriever, avoiding redundant file I/O and embedding computation on every
 # API request.
 # ===========================================================================
@@ -270,7 +415,7 @@ _retriever_meta = {
 
 def _init_retriever():
     """
-    Internal helper — build the FAISS retriever once and cache it at module level.
+    Internal helper — build the Milvus retriever once and cache it at module level.
     Called lazily the first time get_rag_response() is invoked.
     """
     global _retriever
@@ -283,7 +428,7 @@ def _init_retriever():
     vector_store = build_vector_store(chunks, embeddings)
     _retriever = create_retriever(vector_store)
     _retriever_meta["chunks"] = len(chunks)
-    _retriever_meta["vectors"] = vector_store.index.ntotal
+    _retriever_meta["vectors"] = vector_store.vector_count
     _retriever_meta["last_rebuild"] = datetime.utcnow().isoformat()
     return _retriever
 
@@ -324,7 +469,7 @@ def get_rag_status() -> dict:
     """Return retriever status metadata for admin dashboard."""
     return {
         "status": "ready" if _retriever is not None else "idle",
-        "provider": "faiss",
+        "provider": "milvus",
         "policy_path": _retriever_meta["policy_path"],
         "chunks": _retriever_meta["chunks"],
         "vectors": _retriever_meta["vectors"],
@@ -335,13 +480,13 @@ def get_rag_status() -> dict:
 # Function: get_rag_response
 # Purpose: Retrieve the most relevant company policy text for a given transcript
 # Input: transcript (str) — the customer support call transcript or query text
-# Output: str — concatenated policy context from the top-k FAISS matches
+# Output: str — concatenated policy context from the top-k Milvus matches
 # Why needed: The backend calls this function BEFORE sending the transcript to the
 #   LLM for evaluation. The returned policy context is injected into the LLM prompt
 #   so that scoring is grounded in actual company rules — not generic assumptions.
 # How it connects to RAG:
-#   1. Lazily initialises the FAISS retriever (load → chunk → embed → index)
-#   2. Queries the FAISS index with the transcript text
+#   1. Lazily initialises the Milvus retriever (load → chunk → embed → index)
+#   2. Queries the Milvus index with the transcript text
 #   3. Returns the retrieved policy passages as a single context string
 #   This is the primary integration point between the backend and the RAG pipeline.
 def get_rag_response(transcript: str) -> str:
@@ -363,7 +508,7 @@ def get_rag_response(transcript: str) -> str:
     # Trim to a reasonable length to keep the embedding efficient
     query = transcript[:2000]
 
-    # Retrieve top-k policy chunks from FAISS
+    # Retrieve top-k policy chunks from Milvus
     docs = retriever.invoke(query)
 
     # Join chunk texts into a single context block
@@ -385,7 +530,7 @@ def main():
     # Step 3: Create embeddings
     embeddings = create_embeddings()
 
-    # Step 4: Store in FAISS
+    # Step 4: Store in Milvus
     vector_store = build_vector_store(chunks, embeddings)
 
     # Step 5: Create retriever
