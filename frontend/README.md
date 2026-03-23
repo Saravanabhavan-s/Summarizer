@@ -43,7 +43,7 @@ npm install
 npm run dev
 ```
 
-Visit `http://localhost:5173/`
+Open the URL shown by Vite in your terminal after running the dev server.
 
 ### Build for Production
 
@@ -54,10 +54,10 @@ npm run preview
 
 ## API Configuration
 
-Update `src/utils/constants.js` to point to your backend:
+Set your backend URL in environment variables:
 
 ```javascript
-export const API_BASE_URL = 'http://localhost:8000';
+VITE_API_BASE_URL=https://echoscore.onrender.com
 ```
 
 Expected backend endpoint: `POST /process-call`

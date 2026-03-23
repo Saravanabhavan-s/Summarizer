@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { PROCESS_CALL_ENDPOINT } from './constants';
 
-// Use environment variable if available, otherwise use default
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const client = axios.create({
   baseURL: API_BASE_URL,
