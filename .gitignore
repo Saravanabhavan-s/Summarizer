@@ -6,3 +6,5 @@ audio_and_txt/
 make_pdf.py
 generated_transcripts/
 generated_reports/
+policy.txt
+policy_files/
