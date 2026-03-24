@@ -3,10 +3,10 @@ __pycache__
 .git
 .env
 
-audio_and_txt
+audio_and_txt/
 
-generated_reports
-generated_transcripts
+generated_reports/
+generated_transcripts/
 
 frontend/node_modules
 frontend/dist
