@@ -57,7 +57,7 @@ npm run preview
 Set your backend URL in environment variables:
 
 ```javascript
-VITE_API_BASE_URL=https://echoscore.onrender.com
+VITE_API_URL=http://localhost:8000
 ```
 
 Expected backend endpoint: `POST /process-call`
