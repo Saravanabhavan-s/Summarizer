@@ -24,7 +24,7 @@ export const liveTranscribe = async (file) => {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await client.post('/live-transcribe', formData, {
+  const response = await client.post('/api/live-transcribe', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
       ...getAuthHeader(),
@@ -38,7 +38,7 @@ export const liveTranscribe = async (file) => {
  */
 export const scoreLiveChunk = async (text, chunkIndex = 0, timeStart = 0, timeEnd = 10) => {
   const response = await client.post(
-    '/live-chunk-score',
+    '/api/live-chunk-score',
     { text, chunk_index: chunkIndex, time_start: timeStart, time_end: timeEnd },
     {
       headers: {
@@ -54,7 +54,7 @@ export const scoreLiveChunk = async (text, chunkIndex = 0, timeStart = 0, timeEn
  * Save completed live session in server-side history
  */
 export const saveLiveSession = async (payload) => {
-  const response = await client.post('/live-session-complete', payload, {
+  const response = await client.post('/api/live-session-complete', payload, {
     headers: {
       'Content-Type': 'application/json',
       ...getAuthHeader(),

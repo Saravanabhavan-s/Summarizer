@@ -57,7 +57,7 @@ npm run preview
 Set your backend URL in environment variables:
 
 ```javascript
-VITE_API_URL=http://localhost:8000
+VITE_API_URL=http://localhost:8080
 ```
 
 Expected backend endpoint: `POST /process-call`
