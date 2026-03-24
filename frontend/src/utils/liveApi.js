@@ -5,11 +5,10 @@
  */
 
 import axios from 'axios';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://echoscore.onrender.com';
+import { API_BASE } from './constants';
 
 const client = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_BASE,
   timeout: 300000,
 });
 

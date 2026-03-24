@@ -1,4 +1,6 @@
 // API Configuration
+export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://echoscore.onrender.com';
+
 export const PROCESS_CALL_ENDPOINT = '/process-call';
 
 // Score thresholds for grading

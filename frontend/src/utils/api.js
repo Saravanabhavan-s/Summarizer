@@ -1,10 +1,8 @@
 import axios from 'axios';
-import { PROCESS_CALL_ENDPOINT } from './constants';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://echoscore.onrender.com';
+import { API_BASE, PROCESS_CALL_ENDPOINT } from './constants';
 
 const client = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_BASE,
   timeout: 300000, // 5 minutes for long processing
 });
 
