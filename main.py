@@ -3,7 +3,7 @@ FastAPI Backend for Call Quality Scoring System
 Integrates with the call_quality_scorer module
 """
 
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Query
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from pydantic import BaseModel, Field
@@ -422,15 +422,25 @@ app = FastAPI(
 if "admin" not in USERS_DB:
     result = create_admin_user(username="admin", password="admin123")
     print(f"[STARTUP] {result['message']}")
-
+origins = [
+    "https://echoscore-sigma.vercel.app",
+    "https://saravanabhavans.me",
+    "http://localhost:5173",
+]
 # Enable CORS for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.options("/{full_path:path}")
+async def cors_preflight_handler(full_path: str):
+    """Global OPTIONS fallback; CORSMiddleware injects CORS headers for allowed origins."""
+    return Response(status_code=204)
 
 # Register live-transcription router (new feature — additive only)
 app.include_router(live_router)
@@ -567,16 +577,6 @@ async def get_profile(user: dict = Depends(get_current_user)):
 #     7. Return the unified JSON response
 #   The RAG integration is transparent — the frontend receives the same JSON
 #   format as before, but scores are now grounded in company policy.
-
-# Handle CORS preflight request for process-call
-@app.options("/process-call")
-async def process_call_preflight():
-    """Handle CORS preflight for process-call endpoint"""
-    return JSONResponse(content="OK", headers={
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "*",
-    })
 
 @app.post("/process-call")
 async def process_call(file: UploadFile = File(...), user: dict = Depends(get_current_user)):
