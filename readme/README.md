@@ -131,7 +131,7 @@ Summarizer/
 **For Development** (default):
 ```javascript
 // src/utils/api.js
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://localhost:8080';
 ```
 
 **For Production** (environment variable):

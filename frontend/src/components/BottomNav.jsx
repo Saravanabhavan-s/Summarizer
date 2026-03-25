@@ -18,30 +18,39 @@ const NAV_ITEMS = [
 ];
 
 const ADMIN_ITEM = { id: 'admin', label: 'Admin', icon: '🛡️', path: '/admin' };
+const SIGN_OUT_ITEM = { id: 'signout', label: 'Sign Out', icon: '↩' };
 
 export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   const isActive = (path) => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
   };
 
-  const navItems = user?.role === 'admin'
+  const roleBasedItems = user?.role === 'admin'
     ? [...NAV_ITEMS, ADMIN_ITEM]
     : NAV_ITEMS;
+
+  const navItems = [...roleBasedItems, SIGN_OUT_ITEM];
 
   return (
     <nav className={styles.bottomNav} aria-label="Mobile navigation">
       {navItems.map((item) => {
-        const active = isActive(item.path);
+        const isSignOut = item.id === 'signout';
+        const active = isSignOut ? false : isActive(item.path);
         return (
           <button
             key={item.id}
-            className={`${styles.navItem} ${active ? styles.active : ''}`}
-            onClick={() => navigate(item.path)}
+            className={`${styles.navItem} ${active ? styles.active : ''} ${isSignOut ? styles.signOutItem : ''}`}
+            onClick={isSignOut ? handleLogout : () => navigate(item.path)}
             aria-label={item.label}
           >
             <span className={styles.icon}>{item.icon}</span>

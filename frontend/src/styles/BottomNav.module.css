@@ -70,6 +70,18 @@
     color: #4a9eff;
   }
 
+  .signOutItem .label {
+    color: rgba(255, 142, 142, 0.9);
+  }
+
+  .signOutItem .icon {
+    color: #ff8e8e;
+  }
+
+  .signOutItem:hover {
+    background: rgba(255, 96, 96, 0.08);
+  }
+
   /* Glow dot indicator for active tab */
   .activeGlow {
     position: absolute;
