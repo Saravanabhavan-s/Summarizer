@@ -423,9 +423,7 @@ if "admin" not in USERS_DB:
     result = create_admin_user(username="admin", password="admin123")
     print(f"[STARTUP] {result['message']}")
 origins = [
-    "https://echoscore-sigma.vercel.app",
-    "https://saravanabhavans.me",
-    "http://localhost:5173",
+    "https://echoscore-sigma.vercel.app"
 ]
 # Enable CORS for frontend
 app.add_middleware(
