@@ -10,7 +10,7 @@ import { useAuth } from '../contexts/AuthContext';
 import styles from '../styles/BottomNav.module.css';
 
 const NAV_ITEMS = [
-  { id: 'upload',  label: 'Home',    icon: '📤', path: '/' },
+  { id: 'upload',  label: 'Home',    icon: '📤', path: '/dashboard' },
   { id: 'history', label: 'Calls',   icon: '📋', path: '/history' },
   { id: 'reports', label: 'Reports', icon: '📊', path: '/reports' },
   { id: 'compare', label: 'Analysis',icon: '⚖️', path: '/compare' },
@@ -31,7 +31,7 @@ export default function BottomNav() {
   };
 
   const isActive = (path) => {
-    if (path === '/') return location.pathname === '/';
+    if (path === '/dashboard') return location.pathname === '/dashboard';
     return location.pathname.startsWith(path);
   };
 

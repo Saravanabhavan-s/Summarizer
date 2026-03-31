@@ -12,7 +12,7 @@ import { useAuth } from '../contexts/AuthContext';
 import styles from '../styles/Sidebar.module.css';
 
 const NAV_ITEMS = [
-  { id: 'upload',   label: 'Upload',   icon: '📤', path: '/' },
+  { id: 'upload',   label: 'Upload',   icon: '📤', path: '/dashboard' },
   { id: 'history',  label: 'History',  icon: '📋', path: '/history' },
   { id: 'compare',  label: 'Compare',  icon: '⚖️',  path: '/compare' },
   { id: 'reports',  label: 'Reports',  icon: '📊', path: '/reports' },
@@ -33,7 +33,7 @@ export default function Sidebar() {
 
   // Determine active tab based on current path
   const isActive = (path) => {
-    if (path === '/') return location.pathname === '/';
+    if (path === '/dashboard') return location.pathname === '/dashboard';
     return location.pathname.startsWith(path);
   };
 
@@ -47,7 +47,7 @@ export default function Sidebar() {
       <div className={styles.glowTop} aria-hidden="true" />
 
       {/* Logo */}
-      <div className={styles.logo} onClick={() => navigate('/')} role="button" tabIndex={0}>
+      <div className={styles.logo} onClick={() => navigate('/dashboard')} role="button" tabIndex={0}>
         <span className={styles.logoIcon}>🎙️</span>
         <div>
           <p className={styles.logoTitle}>EchoScore</p>

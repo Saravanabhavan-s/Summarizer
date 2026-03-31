@@ -15,7 +15,7 @@ export default function IntroPage() {
 
   // Auto-navigate to home after animation completes
   useEffect(() => {
-    const t = setTimeout(() => navigate('/'), 3200);
+    const t = setTimeout(() => navigate('/dashboard'), 3200);
     return () => clearTimeout(t);
   }, [navigate]);
 

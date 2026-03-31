@@ -19,7 +19,7 @@ export default function ResultsPage() {
     return (
       <main className={styles.page}>
         <div className={styles.panel}>
-          <button className={styles.backButton} onClick={() => navigate('/')} type="button">
+          <button className={styles.backButton} onClick={() => navigate('/dashboard')} type="button">
             ← Back to Upload
           </button>
           <div className={styles.emptyState}>
@@ -67,7 +67,7 @@ export default function ResultsPage() {
     <main className={styles.page}>
       <div className={styles.panel}>
         <div className={styles.headerRow}>
-          <button className={styles.backButton} onClick={() => navigate('/')} type="button">
+          <button className={styles.backButton} onClick={() => navigate('/dashboard')} type="button">
             ← Back to Upload
           </button>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
