@@ -1,0 +1,1015 @@
+/* ==========================================================================
+   LandingPage.module.css — Premium AI SaaS Landing Page
+   Dark theme with red/pink/purple/blue glow accents
+   ========================================================================== */
+
+/* ── Base layout ────────────────────────────────────────────────────────── */
+
+.landingPage {
+  width: 100%;
+  min-height: 100vh;
+  background: #04060e;
+  color: #ffffff;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.landingPage *,
+.landingPage *::before,
+.landingPage *::after {
+  box-sizing: border-box;
+}
+
+/* ── Shared section styles ──────────────────────────────────────────────── */
+
+.section {
+  position: relative;
+  padding: 120px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.sectionTag {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.1);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  padding: 6px 16px;
+  border-radius: 100px;
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+
+.sectionSubtitle {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.55);
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+.sectionCenter {
+  text-align: center;
+}
+
+.sectionCenter .sectionSubtitle {
+  margin: 0 auto;
+}
+
+/* ── Gradient dividers between sections ─────────────────────────────────── */
+
+.gradientDivider {
+  height: 1px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.3), rgba(74, 158, 255, 0.3), transparent);
+}
+
+/* ==========================================================================
+   HERO SECTION
+   ========================================================================== */
+
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 120px 24px 80px;
+  overflow: hidden;
+}
+
+/* Grid background */
+.heroGrid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 30%, transparent 80%);
+  pointer-events: none;
+}
+
+/* Glow orbs */
+.heroGlowBlue {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(74, 158, 255, 0.15), transparent 70%);
+  top: 10%;
+  left: -10%;
+  filter: blur(60px);
+  pointer-events: none;
+  animation: driftSlow 18s ease-in-out infinite;
+}
+
+.heroGlowPurple {
+  position: absolute;
+  width: 450px;
+  height: 450px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.12), transparent 70%);
+  top: 20%;
+  right: -8%;
+  filter: blur(60px);
+  pointer-events: none;
+  animation: driftSlow 22s ease-in-out infinite reverse;
+}
+
+.heroGlowPink {
+  position: absolute;
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.08), transparent 70%);
+  bottom: 15%;
+  left: 30%;
+  filter: blur(60px);
+  pointer-events: none;
+  animation: driftSlow 20s ease-in-out infinite;
+}
+
+/* Mouse spotlight */
+.heroSpotlight {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.06), transparent 60%);
+  pointer-events: none;
+  transition: transform 0.3s ease-out;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+}
+
+@keyframes driftSlow {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(25px, -15px) scale(1.05); }
+  66% { transform: translate(-20px, 20px) scale(0.95); }
+}
+
+/* Hero content */
+.heroContent {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+}
+
+.heroTitle {
+  font-size: clamp(2.5rem, 6vw, 4.2rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.7) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.heroTitleAccent {
+  background: linear-gradient(135deg, #4a9eff 0%, #7c3aed 50%, #ec4899 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.heroDesc {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.7;
+  max-width: 580px;
+  margin: 0 auto 40px;
+}
+
+.heroCtas {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ctaPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #4a9eff 0%, #7c3aed 100%);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.3s;
+  text-decoration: none;
+  box-shadow: 0 0 30px rgba(74, 158, 255, 0.2);
+}
+
+.ctaPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 50px rgba(74, 158, 255, 0.35);
+  border-color: transparent;
+  background: linear-gradient(135deg, #4a9eff 0%, #7c3aed 100%);
+}
+
+.ctaSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s;
+  text-decoration: none;
+}
+
+.ctaSecondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+/* ── Microphone visual ─────────────────────────────────────────────────── */
+
+.micVisual {
+  position: relative;
+  margin-bottom: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.micIcon {
+  font-size: 4rem;
+  position: relative;
+  z-index: 2;
+}
+
+.micRing {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid;
+  animation: pulseRing 3s ease-out infinite;
+  opacity: 0;
+}
+
+.micRing1 {
+  width: 100px;
+  height: 100px;
+  border-color: rgba(74, 158, 255, 0.35);
+  animation-delay: 0s;
+}
+
+.micRing2 {
+  width: 140px;
+  height: 140px;
+  border-color: rgba(124, 58, 237, 0.25);
+  animation-delay: 0.7s;
+}
+
+.micRing3 {
+  width: 180px;
+  height: 180px;
+  border-color: rgba(236, 72, 153, 0.15);
+  animation-delay: 1.4s;
+}
+
+@keyframes pulseRing {
+  0% { transform: scale(0.6); opacity: 0.7; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+/* ── Waveform bars ─────────────────────────────────────────────────────── */
+
+.waveformBars {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0.5;
+}
+
+.waveBar {
+  width: 3px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #4a9eff, #7c3aed);
+  animation: waveAnim 1.6s ease-in-out infinite;
+}
+
+@keyframes waveAnim {
+  0%, 100% { height: var(--h-min, 8px); }
+  50% { height: var(--h-max, 28px); }
+}
+
+/* ── Floating dashboard cards ──────────────────────────────────────────── */
+
+.floatingCards {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  height: 200px;
+  margin-top: 60px;
+  z-index: 2;
+}
+
+.floatCard {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 18px 22px;
+  min-width: 160px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.floatCardLabel {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 6px;
+}
+
+.floatCardValue {
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.floatCardValueGreen {
+  color: #22c55e;
+}
+
+.floatCardValueBlue {
+  color: #4a9eff;
+}
+
+.floatCardValuePurple {
+  color: #7c3aed;
+}
+
+.floatCardBar {
+  margin-top: 8px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.floatCardBarFill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #4a9eff, #7c3aed);
+}
+
+/* ── Nav bar at top ────────────────────────────────────────────────────── */
+
+.landingNav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: rgba(4, 6, 14, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  transition: background 0.3s;
+}
+
+.navLogo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.navLogoIcon {
+  font-size: 1.5rem;
+}
+
+.navLogoText {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  background: linear-gradient(135deg, #4a9eff, #7c3aed);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.navLink {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  transition: color 0.2s;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  padding: 0;
+}
+
+.navLink:hover {
+  color: #fff;
+}
+
+.navCta {
+  padding: 8px 22px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #4a9eff, #7c3aed);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+  text-decoration: none;
+}
+
+.navCta:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  border-color: transparent;
+  background: linear-gradient(135deg, #4a9eff, #7c3aed);
+}
+
+/* ==========================================================================
+   FEATURES SECTION
+   ========================================================================== */
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 56px;
+}
+
+.featureCard {
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 32px 28px;
+  transition: transform 0.3s ease, border-color 0.3s, box-shadow 0.3s;
+  overflow: hidden;
+  cursor: default;
+}
+
+.featureCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 1px;
+  background: linear-gradient(135deg, transparent, rgba(124, 58, 237, 0.3), transparent);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.featureCard:hover {
+  transform: translateY(-4px);
+  border-color: rgba(124, 58, 237, 0.25);
+  box-shadow: 0 12px 40px rgba(124, 58, 237, 0.08), 0 0 60px rgba(74, 158, 255, 0.04);
+}
+
+.featureCard:hover::before {
+  opacity: 1;
+}
+
+.featureIcon {
+  font-size: 2rem;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.featureCardTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.featureCardDesc {
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.55;
+}
+
+/* ==========================================================================
+   WORKFLOW SECTION
+   ========================================================================== */
+
+.workflowContainer {
+  margin-top: 56px;
+}
+
+.workflowSteps {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  position: relative;
+}
+
+.workflowStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+  max-width: 220px;
+  position: relative;
+  padding: 0 16px;
+}
+
+.stepNumber {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: rgba(124, 58, 237, 0.1);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.stepTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.stepDesc {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1.5;
+}
+
+/* Connecting line */
+.stepConnector {
+  position: absolute;
+  top: 28px;
+  left: calc(50% + 36px);
+  width: calc(100% - 72px);
+  height: 2px;
+  background: rgba(124, 58, 237, 0.15);
+  z-index: 1;
+}
+
+.stepConnectorFill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #4a9eff, #7c3aed);
+  border-radius: 1px;
+  transition: width 1s ease-out;
+}
+
+.stepConnectorFill.animated {
+  width: 100%;
+}
+
+/* ==========================================================================
+   DASHBOARD PREVIEW SECTION
+   ========================================================================== */
+
+.previewContainer {
+  margin-top: 56px;
+  position: relative;
+}
+
+.previewGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.previewCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 28px 24px;
+  transition: transform 0.35s ease, border-color 0.35s, box-shadow 0.35s;
+  position: relative;
+  overflow: hidden;
+}
+
+.previewCard:hover {
+  transform: translateY(-3px);
+  border-color: rgba(74, 158, 255, 0.2);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+}
+
+.previewCardLarge {
+  grid-column: span 2;
+}
+
+.previewCardIcon {
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.previewCardTitle {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 8px;
+}
+
+.previewCardValue {
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.previewCardSub {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 6px;
+}
+
+/* Score ring */
+.scoreRing {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 12px;
+  position: relative;
+}
+
+.scoreRingSvg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.scoreRingBg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 6;
+}
+
+.scoreRingFill {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1.5s ease-out;
+}
+
+.scoreRingValue {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* Mini chart bars */
+.miniChart {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 50px;
+  margin-top: 12px;
+}
+
+.miniChartBar {
+  flex: 1;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(180deg, #4a9eff, rgba(74, 158, 255, 0.3));
+  transition: height 1s ease-out;
+}
+
+/* Keyword tags */
+.keywordTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.keywordTag {
+  font-size: 0.75rem;
+  padding: 5px 12px;
+  border-radius: 100px;
+  background: rgba(124, 58, 237, 0.1);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* Sentiment indicator */
+.sentimentRow {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.sentimentDot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.sentimentDotCircle {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* ==========================================================================
+   PRIVACY SECTION
+   ========================================================================== */
+
+.privacyGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 56px;
+}
+
+.privacyCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 32px 28px;
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.privacyCard:hover {
+  transform: translateY(-3px);
+  border-color: rgba(74, 158, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.privacyIconWrap {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 12px;
+  background: rgba(74, 158, 255, 0.08);
+  border: 1px solid rgba(74, 158, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
+
+.privacyCardTitle {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.privacyCardDesc {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1.55;
+}
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+
+.footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 48px 24px 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footerInner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+
+.footerBrand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footerBrandIcon {
+  font-size: 1.6rem;
+}
+
+.footerBrandName {
+  font-size: 1.3rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #4a9eff, #7c3aed);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.footerLinks {
+  display: flex;
+  gap: 28px;
+}
+
+.footerLink {
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-decoration: none;
+  transition: color 0.2s;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  padding: 0;
+}
+
+.footerLink:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.footerCopy {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.2);
+  text-align: center;
+}
+
+/* ==========================================================================
+   PARTICLES
+   ========================================================================== */
+
+.particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(124, 58, 237, 0.3);
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+  .featuresGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .previewGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .previewCardLarge {
+    grid-column: span 2;
+  }
+
+  .floatingCards {
+    height: 170px;
+    max-width: 550px;
+  }
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 80px 20px;
+  }
+
+  .hero {
+    padding: 100px 20px 60px;
+    min-height: auto;
+  }
+
+  .heroTitle {
+    font-size: clamp(2rem, 8vw, 2.8rem);
+  }
+
+  .heroDesc {
+    font-size: 1.05rem;
+  }
+
+  .navLinks {
+    display: none;
+  }
+
+  .featuresGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .workflowSteps {
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .workflowStep {
+    max-width: 100%;
+  }
+
+  .stepConnector {
+    display: none;
+  }
+
+  .previewGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .previewCardLarge {
+    grid-column: span 1;
+  }
+
+  .privacyGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .floatingCards {
+    display: none;
+  }
+
+  .footerInner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .footerLinks {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .landingNav {
+    padding: 12px 16px;
+  }
+
+  .heroCtas {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .ctaPrimary,
+  .ctaSecondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .section {
+    padding: 60px 16px;
+  }
+}

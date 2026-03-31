@@ -1,13 +1,16 @@
 /**
  * App.jsx — Root router with auth guards and dashboard layout
  *
- * Public routes:  /login, /intro
+ * Public routes:  /, /login, /intro
  * Protected routes (require JWT): all others — rendered inside DashboardLayout
- *   /          → UploadPage
- *   /results   → ResultsPage
- *   /history   → HistoryPage
- *   /history/:id → HistoryDetailPage
- *   /compare   → ComparePage
+ *   /dashboard    → UploadPage
+ *   /results      → ResultsPage
+ *   /history      → HistoryPage
+ *   /history/:id  → HistoryDetailPage
+ *   /compare      → ComparePage
+ *   /reports      → ReportsPage
+ *   /admin/*      → Admin pages
+ *   /live-transcription → LiveTranscriptionPage
  */
 
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
@@ -15,6 +18,7 @@ import { AnimatePresence } from 'framer-motion';
 import { useAuth } from './contexts/AuthContext';
 import PageWrapper from './components/PageWrapper';
 import Sidebar from './components/Sidebar';
+import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import IntroPage from './pages/IntroPage';
 import UploadPage from './pages/UploadPage';
@@ -56,7 +60,7 @@ function ProtectedRoute({ children }) {
 function AdminRoute({ children }) {
   const { isAuthenticated, user } = useAuth();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (user?.role !== 'admin') return <Navigate to="/" replace />;
+  if (user?.role !== 'admin') return <Navigate to="/dashboard" replace />;
   return children;
 }
 
@@ -67,12 +71,13 @@ export default function App() {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         {/* ── Public ── */}
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/intro" element={<IntroPage />} />
 
         {/* ── Protected (wrapped in dashboard layout + page transition) ── */}
         <Route
-          path="/"
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <DashboardLayout>

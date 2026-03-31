@@ -59,7 +59,7 @@ export default function HistoryPage() {
   return (
     <main className={styles.page}>
       <div className={styles.panel}>
-        <button className={styles.backButton} onClick={() => navigate('/')} type="button">
+        <button className={styles.backButton} onClick={() => navigate('/dashboard')} type="button">
           ← Back to Upload
         </button>
         {actionError && <p className={styles.emptyText}>{actionError}</p>}

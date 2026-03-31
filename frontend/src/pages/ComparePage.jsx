@@ -1,10 +1,3 @@
-/**
- * ComparePage — Side-by-side comparison of two call evaluations
- *
- * Step 1: User selects 2 items from combined local + server history
- * Step 2: Scores, charts, violations, and improvements shown side-by-side
- */
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,7 +5,6 @@ import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer, Tooltip,
 } from 'recharts';
-import { getCallHistory } from '../utils/storage';
 import { getServerHistory } from '../utils/api';
 import { getPerformanceMetrics } from '../utils/metrics';
 import styles from '../styles/ComparePage.module.css';
@@ -142,20 +134,14 @@ export default function ComparePage() {
   const [compareData, setCompareData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Load history from localStorage + server on mount
+  // Load history from server only — ensures user-level data isolation
   useEffect(() => {
-    const localHistory = getCallHistory();
-    setHistory(localHistory);
-    setLoading(false);
-
-    // Also try server-side history (merge by id)
     getServerHistory().then(({ history: serverItems = [] }) => {
-      if (serverItems.length === 0) return;
-      setHistory((prev) => {
-        const existingIds = new Set(prev.map((e) => String(e.id)));
-        const newItems = serverItems.filter((e) => !existingIds.has(String(e.id)));
-        return [...newItems, ...prev];
-      });
+      setHistory(serverItems);
+      setLoading(false);
+    }).catch(() => {
+      setHistory([]);
+      setLoading(false);
     });
   }, []);
 
@@ -216,7 +202,7 @@ export default function ComparePage() {
                   <p className={pageStyles.emptyText}>
                     Upload and analyse at least 2 call recordings first.
                   </p>
-                  <button className={pageStyles.backButton} onClick={() => navigate('/')}>
+                  <button className={pageStyles.backButton} onClick={() => navigate('/dashboard')}>
                     Go to Upload
                   </button>
                 </div>
