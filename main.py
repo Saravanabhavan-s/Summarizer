@@ -422,10 +422,7 @@ app = FastAPI(
 if "admin" not in USERS_DB:
     result = create_admin_user(username="admin", password="admin123")
     print(f"[STARTUP] {result['message']}")
-<<<<<<< HEAD
-=======
 
->>>>>>> test-version
 # Enable CORS for frontend
 app.add_middleware(
     CORSMiddleware,
