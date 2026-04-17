@@ -35,6 +35,12 @@ class User:
     blocked: bool = False
     last_login: Optional[str] = None
     last_activity: Optional[str] = None
+    display_name: Optional[str] = None
+    organization: Optional[str] = None
+    avatar_url: Optional[str] = None
+    totp_enabled: bool = False
+    totp_secret: Optional[str] = None
+    google_id: Optional[str] = None
 
 
 def _utcnow() -> datetime:
@@ -57,6 +63,12 @@ def _doc_to_user(doc: Optional[dict]) -> Optional[User]:
         blocked=bool(doc.get("blocked", False)),
         last_login=doc.get("last_login"),
         last_activity=doc.get("last_activity"),
+        display_name=doc.get("display_name"),
+        organization=doc.get("organization"),
+        avatar_url=doc.get("avatar_url"),
+        totp_enabled=bool(doc.get("totp_enabled", False)),
+        totp_secret=doc.get("totp_secret"),
+        google_id=doc.get("google_id"),
     )
 
 
@@ -69,6 +81,11 @@ def _user_public_dict(user: User) -> dict:
         "created_at": user.created_at,
         "last_login": user.last_login,
         "last_activity": user.last_activity,
+        "display_name": user.display_name,
+        "organization": user.organization,
+        "avatar_url": user.avatar_url,
+        "totp_enabled": user.totp_enabled,
+        "google_id": user.google_id,
     }
 
 
@@ -225,7 +242,14 @@ def login_user(username: str, password: str) -> dict:
         "message": f"Welcome, {user.username}!",
         "token": token,
         "user_id": user.user_id,
+        "username": user.username,
         "role": user.role,
+        "display_name": user.display_name,
+        "organization": user.organization,
+        "avatar_url": user.avatar_url,
+        "totp_enabled": user.totp_enabled,
+        "created_at": user.created_at,
+        "last_login": user.last_login,
     }
 
 

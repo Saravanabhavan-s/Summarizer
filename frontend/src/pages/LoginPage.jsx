@@ -12,7 +12,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
-import { registerUser } from '../utils/api';
+import { registerUser, getGoogleAuthUrl } from '../utils/api';
 import styles from '../styles/LoginPage.module.css';
 
 // Number of waveform bars for the audio visualization
@@ -254,6 +254,30 @@ export default function LoginPage() {
                   : 'Sign In →'
               }
             </motion.button>
+
+            {/* ── Divider ── */}
+            {!isSignup && (
+              <>
+                <div className={styles.divider}>
+                  <span className={styles.dividerText}>or</span>
+                </div>
+                <motion.button
+                  type="button"
+                  className={styles.googleBtn}
+                  whileHover={{ scale: 1.025 }}
+                  whileTap={{ scale: 0.975 }}
+                  onClick={async () => {
+                    const res = await getGoogleAuthUrl();
+                    if (res?.auth_url) window.location.href = res.auth_url;
+                    else setError('Google OAuth not configured on server');
+                  }}
+                  disabled={isLoading}
+                >
+                  <span className={styles.googleG}>G</span>
+                  Continue with Google
+                </motion.button>
+              </>
+            )}
           </form>
 
           <p className={styles.switchText}>

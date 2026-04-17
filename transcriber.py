@@ -57,6 +57,21 @@ Rules:
 # ======================================================================
 
 def transcribe_audio(file_path: str) -> dict:
+    """
+    Transcribe audio using Deepgram nova-2 with speaker diarization.
+
+    Returns:
+        {
+            "transcript": str,                     # raw flat transcript (backward compat)
+            "formatted_transcript": str,           # Speaker-labelled transcript for chat UI
+            "duration_seconds": int,
+            "speaker_count": int,
+            "speaker_map": {                       # e.g. {"0": "Agent", "1": "Customer"}
+                "0": "Agent",
+                "1": "Customer"
+            }
+        }
+    """
     path = Path(file_path)
 
     if not path.exists():
@@ -82,8 +97,10 @@ def transcribe_audio(file_path: str) -> dict:
         options,
     )
 
-    # Correct object-style access
-    transcript = response.results.channels[0].alternatives[0].transcript
+    alternative = response.results.channels[0].alternatives[0]
+
+    # Flat raw transcript (backward compatibility)
+    transcript = alternative.transcript
 
     # Safe duration extraction
     duration = 0
@@ -95,12 +112,84 @@ def transcribe_audio(file_path: str) -> dict:
     if not transcript.strip():
         raise ValueError("Deepgram returned empty transcript.")
 
+    # ----------------------------------------------------------------
+    # Build speaker-diarized formatted transcript from per-word data
+    # Words carry a `speaker` field when diarize=True.
+    # We group consecutive words by speaker into utterances, then format
+    # as "Speaker 0: <text>\nSpeaker 1: <text>\n..."
+    # Convention: Speaker 0 = Agent (first speaker heard on the call).
+    # ----------------------------------------------------------------
+    formatted_transcript = transcript  # safe fallback
+    speaker_count = 1
+    speaker_map: dict = {"0": "Agent", "1": "Customer"}
+
+    try:
+        words = alternative.words or []
+        if words and hasattr(words[0], "speaker"):
+            segments: list[dict] = []
+            current_speaker = None
+            current_words: list[str] = []
+
+            for word_obj in words:
+                spk = str(getattr(word_obj, "speaker", "0"))
+                text = getattr(word_obj, "punctuated_word", None) or getattr(word_obj, "word", "")
+
+                if spk != current_speaker:
+                    if current_words:
+                        segments.append({
+                            "speaker": current_speaker,
+                            "text": " ".join(current_words),
+                        })
+                    current_speaker = spk
+                    current_words = [text]
+                else:
+                    current_words.append(text)
+
+            # Flush last segment
+            if current_words:
+                segments.append({"speaker": current_speaker, "text": " ".join(current_words)})
+
+            # Build speaker_map — first speaker = Agent, rest = Customer / Speaker N
+            seen_speakers: list[str] = []
+            for seg in segments:
+                if seg["speaker"] not in seen_speakers:
+                    seen_speakers.append(seg["speaker"])
+
+            speaker_map = {}
+            for idx, spk_id in enumerate(seen_speakers):
+                if idx == 0:
+                    speaker_map[spk_id] = "Agent"
+                elif idx == 1:
+                    speaker_map[spk_id] = "Customer"
+                else:
+                    speaker_map[spk_id] = f"Speaker {spk_id}"
+
+            speaker_count = len(seen_speakers)
+
+            # Build formatted string
+            lines: list[str] = []
+            for seg in segments:
+                label = speaker_map.get(seg["speaker"], f"Speaker {seg['speaker']}")
+                lines.append(f"{label}: {seg['text'].strip()}")
+
+            formatted_transcript = "\n".join(lines)
+            print(f"    ✓ Diarized: {speaker_count} speaker(s), {len(segments)} segment(s)")
+        else:
+            # No word-level diarization available — keep flat transcript
+            print("    ⚠ No per-word speaker data; falling back to flat transcript")
+    except Exception as diarize_err:
+        print(f"    ⚠ Diarization post-processing error: {diarize_err}; using flat transcript")
+        formatted_transcript = transcript
+
     print(f"    ✓ Transcript length: {len(transcript)} characters")
     print(f"    ✓ Duration: {duration} seconds")
 
     return {
         "transcript": transcript,
-        "duration_seconds": duration
+        "formatted_transcript": formatted_transcript,
+        "duration_seconds": duration,
+        "speaker_count": speaker_count,
+        "speaker_map": speaker_map,
     }
 
 # ======================================================================

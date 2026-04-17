@@ -16,10 +16,11 @@ const NAV_ITEMS = [
   { id: 'history',  label: 'History',  icon: '📋', path: '/history' },
   { id: 'compare',  label: 'Compare',  icon: '⚖️',  path: '/compare' },
   { id: 'reports',  label: 'Reports',  icon: '📊', path: '/reports' },
+  { id: 'policy',   label: 'Policy',   icon: '📄', path: '/policy' },
   { id: 'live',     label: 'Live',     icon: '🎙️', path: '/live-transcription' },
 ];
 
-const ADMIN_ITEM = { id: 'admin', label: 'Admin', icon: '🛡️', path: '/admin' };
+const PROFILE_ITEM = { id: 'profile', label: 'Profile', icon: '👤', path: '/profile' };
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -37,6 +38,7 @@ export default function Sidebar() {
     return location.pathname.startsWith(path);
   };
 
+  const ADMIN_ITEM = { id: 'admin', label: 'Admin', icon: '🛡️', path: '/admin' };
   const navItems = user?.role === 'admin'
     ? [...NAV_ITEMS, ADMIN_ITEM]
     : NAV_ITEMS;
@@ -92,12 +94,27 @@ export default function Sidebar() {
       <div className={styles.footer}>
         <div className={styles.divider} />
         {user && (
-          <div className={styles.userInfo}>
-            <div className={styles.userAvatar}>
-              {(user.username?.[0] || 'U').toUpperCase()}
-            </div>
+          <div
+            className={styles.userInfo}
+            onClick={() => navigate('/profile')}
+            style={{ cursor: 'pointer' }}
+            role="button"
+            tabIndex={0}
+            title="View Profile"
+          >
+            {user.avatar_url
+              ? <img
+                  src={user.avatar_url.startsWith('http') ? user.avatar_url : user.avatar_url}
+                  alt="Avatar"
+                  className={styles.userAvatar}
+                  style={{ objectFit: 'cover' }}
+                />
+              : <div className={styles.userAvatar}>
+                  {(user.display_name?.[0] || user.username?.[0] || 'U').toUpperCase()}
+                </div>
+            }
             <div className={styles.userDetails}>
-              <p className={styles.userName}>{user.username}</p>
+              <p className={styles.userName}>{user.display_name || user.username}</p>
               <p className={styles.userRole}>{user.role}</p>
             </div>
           </div>

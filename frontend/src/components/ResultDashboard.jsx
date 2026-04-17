@@ -5,6 +5,7 @@ import ChartsSection from './ChartsSection';
 import ViolationsCard from './ViolationsCard';
 import ImprovementsCard from './ImprovementsCard';
 import SummaryCard from './SummaryCard';
+import TranscriptChatWindow from './TranscriptChatWindow';
 import styles from '../styles/ResultDashboard.module.css';
 
 export default function ResultDashboard({ result }) {
@@ -36,6 +37,15 @@ export default function ResultDashboard({ result }) {
           <div className={styles.section}>
             <SummaryCard summary={result.summary} />
           </div>
+        )}
+
+        {/* Chat-style transcript window (shown when transcript data is available) */}
+        {(result.formatted_transcript || result.transcript || result.transcription) && (
+          <TranscriptChatWindow result={{
+            ...result,
+            formatted_transcript: result.formatted_transcript || result.transcription || '',
+            transcript: result.transcript || result.transcription || '',
+          }} />
         )}
       </div>
     </div>

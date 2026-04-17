@@ -3,7 +3,7 @@ FastAPI Backend for Call Quality Scoring System
 Integrates with the call_quality_scorer module
 """
 
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Query, Response
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Query, Response, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from pydantic import BaseModel, Field
@@ -157,6 +157,28 @@ class SettingsUpdateBody(BaseModel):
     model: Optional[str] = None
     scoring_rules: Optional[Dict[str, Any]] = None
     feature_flags: Optional[Dict[str, bool]] = None
+
+
+class ChangePasswordBody(BaseModel):
+    current_password: str
+    new_password: str
+
+
+class UpdateDisplayNameBody(BaseModel):
+    display_name: str
+
+
+class UpdateOrganizationBody(BaseModel):
+    organization: str
+
+
+class TOTPVerifyBody(BaseModel):
+    code: str
+
+
+class UserPolicyUploadBody(BaseModel):
+    policy_type: str = "general"
+
 
 # ---------------------------------------------------------------------------
 # Server-side call history storage (per-user, in-memory)
@@ -651,9 +673,11 @@ async def process_call(file: UploadFile = File(...), user: dict = Depends(get_cu
         # -------------------------------------------------
 
         if is_audio:
-            # Existing audio pipeline: Deepgram transcription → summarise → score
+            # Audio pipeline: Deepgram transcription with speaker diarization
             transcription = transcribe_audio(temp_path)
             transcript = transcription["transcript"]
+            formatted_transcript = transcription.get("formatted_transcript", transcript)
+            speaker_map = transcription.get("speaker_map", {"0": "Agent", "1": "Customer"})
             duration_seconds = transcription["duration_seconds"]
             summary = summarize_transcript(transcript)
         else:
@@ -668,6 +692,9 @@ async def process_call(file: UploadFile = File(...), user: dict = Depends(get_cu
                     detail="The uploaded document is empty or could not be read.",
                 )
             duration_seconds = 0
+            # Text files may already have Agent:/Customer: labels — preserve as-is
+            formatted_transcript = transcript
+            speaker_map = {"Agent": "Agent", "Customer": "Customer"}
             summary = summarize_transcript(transcript)
 
         # Unified scoring (same for both branches)
@@ -715,7 +742,9 @@ async def process_call(file: UploadFile = File(...), user: dict = Depends(get_cu
             "report_pdf_available": False,
             "transcript_available": True,
             "violations": result['violations'],
-            "improvements": result['improvements']
+            "improvements": result['improvements'],
+            "formatted_transcript": formatted_transcript,
+            "speaker_map": speaker_map,
         }
         
         # Save to server-side history for this user
@@ -1880,6 +1909,482 @@ async def docs_summary():
             ]
         }
     }
+
+
+
+
+# ============================================================================
+# PROFILE ROUTES — Authenticated Users
+# ============================================================================
+
+@app.put("/profile/display-name")
+async def update_display_name(body: UpdateDisplayNameBody, user: dict = Depends(get_current_user)):
+    """Update the current user's display name."""
+    user_id = user["user_id"]
+    display_name = (body.display_name or "").strip()
+    if not display_name or len(display_name) < 2:
+        raise HTTPException(status_code=400, detail="Display name must be at least 2 characters")
+    if len(display_name) > 60:
+        raise HTTPException(status_code=400, detail="Display name must be 60 characters or less")
+    from mongo_auth_db import get_users_collection
+    get_users_collection().update_one({"user_id": user_id}, {"$set": {"display_name": display_name}})
+    record_user_activity(user_id)
+    return {"success": True, "display_name": display_name}
+
+
+@app.put("/profile/organization")
+async def update_organization(body: UpdateOrganizationBody, user: dict = Depends(get_current_user)):
+    """Update the current user's organization name."""
+    user_id = user["user_id"]
+    org = (body.organization or "").strip()
+    from mongo_auth_db import get_users_collection
+    get_users_collection().update_one({"user_id": user_id}, {"$set": {"organization": org}})
+    record_user_activity(user_id)
+    return {"success": True, "organization": org}
+
+
+@app.post("/profile/change-password")
+async def change_password(body: ChangePasswordBody, user: dict = Depends(get_current_user)):
+    """Change password — verifies current password, then hashes and stores new one."""
+    from auth import hash_password, verify_password, get_user
+    from mongo_auth_db import get_users_collection
+    user_id = user["user_id"]
+    db_user = get_user(user_id)
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not verify_password(body.current_password, db_user.password_hash):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    if len(body.new_password) < 8:
+        raise HTTPException(status_code=400, detail="New password must be at least 8 characters")
+    new_hash = hash_password(body.new_password)
+    get_users_collection().update_one({"user_id": user_id}, {"$set": {"password_hash": new_hash}})
+    record_user_activity(user_id)
+    return {"success": True, "message": "Password updated successfully"}
+
+
+@app.post("/profile/picture")
+async def upload_profile_picture(file: UploadFile = File(...), user: dict = Depends(get_current_user)):
+    """Upload and store a profile picture. Stores relative URL; returns avatar_url."""
+    user_id = user["user_id"]
+    AVATAR_DIR = BASE_DIR / "secure_assets" / "avatars"
+    AVATAR_DIR.mkdir(parents=True, exist_ok=True)
+
+    allowed = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
+    ext = Path(file.filename or "avatar.jpg").suffix.lower()
+    if ext not in allowed:
+        raise HTTPException(status_code=400, detail="Allowed image types: jpg, png, webp, gif")
+
+    contents = await file.read()
+    if len(contents) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Image must be under 5 MB")
+
+    safe_name = f"{user_id}{ext}"
+    avatar_path = AVATAR_DIR / safe_name
+    avatar_path.write_bytes(contents)
+    avatar_url = f"/avatars/{safe_name}"
+
+    from mongo_auth_db import get_users_collection
+    get_users_collection().update_one({"user_id": user_id}, {"$set": {"avatar_url": avatar_url}})
+    record_user_activity(user_id)
+    return {"success": True, "avatar_url": avatar_url}
+
+
+@app.get("/avatars/{filename}")
+async def serve_avatar(filename: str):
+    """Serve uploaded profile picture files."""
+    AVATAR_DIR = BASE_DIR / "secure_assets" / "avatars"
+    file_path = AVATAR_DIR / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Avatar not found")
+    return FileResponse(str(file_path))
+
+
+@app.delete("/profile/picture")
+async def remove_profile_picture(user: dict = Depends(get_current_user)):
+    """Remove profile picture and revert to initials avatar."""
+    user_id = user["user_id"]
+    from mongo_auth_db import get_users_collection
+    get_users_collection().update_one({"user_id": user_id}, {"$set": {"avatar_url": None}})
+    return {"success": True, "avatar_url": None}
+
+
+@app.get("/profile/sessions")
+async def get_active_sessions(user: dict = Depends(get_current_user)):
+    """Return list of active (non-revoked, non-expired) sessions for the current user."""
+    from mongo_auth_db import get_tokens_collection
+    user_id = user["user_id"]
+    now = datetime.utcnow()
+    cursor = get_tokens_collection().find(
+        {"user_id": user_id, "revoked": False, "expires_at": {"$gt": now}},
+        {"_id": 0, "jti": 1, "issued_at": 1, "expires_at": 1},
+    ).sort("issued_at", -1).limit(20)
+    sessions = []
+    for doc in cursor:
+        sessions.append({
+            "session_id": doc.get("jti"),
+            "issued_at": doc.get("issued_at").isoformat() if doc.get("issued_at") else None,
+            "expires_at": doc.get("expires_at").isoformat() if doc.get("expires_at") else None,
+        })
+    return {"sessions": sessions}
+
+
+@app.delete("/profile/sessions/{session_id}")
+async def revoke_session(session_id: str, user: dict = Depends(get_current_user)):
+    """Revoke a specific session token by its JTI."""
+    from mongo_auth_db import get_tokens_collection
+    user_id = user["user_id"]
+    result = get_tokens_collection().update_one(
+        {"jti": session_id, "user_id": user_id},
+        {"$set": {"revoked": True}},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return {"success": True, "message": "Session revoked"}
+
+
+@app.delete("/profile/sessions")
+async def revoke_all_other_sessions(user: dict = Depends(get_current_user), authorization: str = Header(None)):
+    """Revoke all sessions except the current one."""
+    from mongo_auth_db import get_tokens_collection
+    import jwt as pyjwt
+    user_id = user["user_id"]
+    current_jti = None
+    try:
+        token_str = (authorization or "").split(" ")[-1]
+        payload = pyjwt.decode(token_str, options={"verify_signature": False})
+        current_jti = payload.get("jti")
+    except Exception:
+        pass
+    query = {"user_id": user_id, "revoked": False}
+    if current_jti:
+        query["jti"] = {"$ne": current_jti}
+    get_tokens_collection().update_many(query, {"$set": {"revoked": True}})
+    return {"success": True, "message": "All other sessions revoked"}
+
+
+# ── TOTP 2FA Endpoints ────────────────────────────────────────────────────────
+
+@app.post("/profile/2fa/setup")
+async def setup_totp(user: dict = Depends(get_current_user)):
+    """
+    Generate a new TOTP secret and return the provisioning URI + QR code data.
+    The secret is stored temporarily; becomes active only after /profile/2fa/verify.
+    """
+    try:
+        import pyotp
+        import qrcode
+        import io
+        import base64
+    except ImportError:
+        raise HTTPException(status_code=501, detail="pyotp / qrcode packages not installed. Run: pip install pyotp qrcode[pil]")
+
+    from mongo_auth_db import get_users_collection
+    user_id = user["user_id"]
+    from auth import get_user
+    db_user = get_user(user_id)
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    secret = pyotp.random_base32()
+    totp = pyotp.TOTP(secret)
+    uri = totp.provisioning_uri(name=db_user.username, issuer_name="EchoScore")
+
+    # Generate QR code
+    qr = qrcode.make(uri)
+    buf = io.BytesIO()
+    qr.save(buf, format="PNG")
+    qr_b64 = base64.b64encode(buf.getvalue()).decode()
+
+    # Store pending secret (not yet active)
+    get_users_collection().update_one({"user_id": user_id}, {"$set": {"totp_secret_pending": secret}})
+
+    return {"success": True, "secret": secret, "uri": uri, "qr_code_base64": qr_b64}
+
+
+@app.post("/profile/2fa/verify")
+async def verify_totp_setup(body: TOTPVerifyBody, user: dict = Depends(get_current_user)):
+    """Confirm TOTP setup by verifying the first code. Activates 2FA on success."""
+    try:
+        import pyotp
+    except ImportError:
+        raise HTTPException(status_code=501, detail="pyotp not installed")
+
+    from mongo_auth_db import get_users_collection
+    user_id = user["user_id"]
+    doc = get_users_collection().find_one({"user_id": user_id}, {"totp_secret_pending": 1})
+    secret = (doc or {}).get("totp_secret_pending")
+    if not secret:
+        raise HTTPException(status_code=400, detail="No pending TOTP setup found. Call /profile/2fa/setup first.")
+
+    totp = pyotp.TOTP(secret)
+    if not totp.verify(body.code, valid_window=1):
+        raise HTTPException(status_code=400, detail="Invalid TOTP code. Please try again.")
+
+    get_users_collection().update_one(
+        {"user_id": user_id},
+        {"$set": {"totp_secret": secret, "totp_enabled": True}, "$unset": {"totp_secret_pending": ""}},
+    )
+    return {"success": True, "message": "Two-factor authentication enabled"}
+
+
+@app.post("/profile/2fa/disable")
+async def disable_totp(body: ChangePasswordBody, user: dict = Depends(get_current_user)):
+    """Disable 2FA — requires password confirmation for security."""
+    from auth import verify_password, get_user
+    from mongo_auth_db import get_users_collection
+    user_id = user["user_id"]
+    db_user = get_user(user_id)
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not verify_password(body.current_password, db_user.password_hash):
+        raise HTTPException(status_code=400, detail="Password is incorrect")
+    get_users_collection().update_one(
+        {"user_id": user_id},
+        {"$set": {"totp_enabled": False, "totp_secret": None}},
+    )
+    return {"success": True, "message": "Two-factor authentication disabled"}
+
+
+# ── Google OAuth ──────────────────────────────────────────────────────────────
+
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
+GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:8000/auth/google/callback")
+
+
+@app.get("/auth/google")
+async def google_oauth_start():
+    """Redirect URL for Google OAuth flow. Returns the authorization URL."""
+    if not GOOGLE_CLIENT_ID:
+        raise HTTPException(status_code=501, detail="Google OAuth not configured. Set GOOGLE_CLIENT_ID in .env")
+    import urllib.parse
+    params = {
+        "client_id": GOOGLE_CLIENT_ID,
+        "redirect_uri": GOOGLE_REDIRECT_URI,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "access_type": "offline",
+        "prompt": "select_account",
+    }
+    auth_url = "https://accounts.google.com/o/oauth2/v2/auth?" + urllib.parse.urlencode(params)
+    return {"auth_url": auth_url}
+
+
+@app.get("/auth/google/callback")
+async def google_oauth_callback(code: str = Query(...)):
+    """
+    Exchange Google auth code for profile; create or link user account.
+    Returns EchoScore JWT on success.
+    """
+    if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+        raise HTTPException(status_code=501, detail="Google OAuth not configured")
+    try:
+        import httpx
+    except ImportError:
+        raise HTTPException(status_code=501, detail="httpx package not installed. Run: pip install httpx")
+
+    from mongo_auth_db import get_users_collection
+    from auth import create_token, hash_password
+
+    async with httpx.AsyncClient() as client_http:
+        # Exchange code for tokens
+        token_resp = await client_http.post(
+            "https://oauth2.googleapis.com/token",
+            data={
+                "code": code,
+                "client_id": GOOGLE_CLIENT_ID,
+                "client_secret": GOOGLE_CLIENT_SECRET,
+                "redirect_uri": GOOGLE_REDIRECT_URI,
+                "grant_type": "authorization_code",
+            },
+        )
+        if token_resp.status_code != 200:
+            raise HTTPException(status_code=400, detail="Failed to exchange Google auth code")
+        tokens = token_resp.json()
+        access_token = tokens.get("access_token")
+
+        # Get user info from Google
+        userinfo_resp = await client_http.get(
+            "https://www.googleapis.com/oauth2/v3/userinfo",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        if userinfo_resp.status_code != 200:
+            raise HTTPException(status_code=400, detail="Failed to get Google user info")
+        google_user = userinfo_resp.json()
+
+    google_id = google_user.get("sub")
+    email = google_user.get("email", "")
+    name = google_user.get("name", "")
+    avatar = google_user.get("picture", "")
+    given_name = google_user.get("given_name", email.split("@")[0])
+
+    users_col = get_users_collection()
+
+    # Try to find existing user by google_id or email-derived username
+    existing = users_col.find_one({"$or": [{"google_id": google_id}, {"username": given_name}]})
+
+    if existing:
+        user_id = existing["user_id"]
+        users_col.update_one(
+            {"user_id": user_id},
+            {"$set": {"google_id": google_id, "avatar_url": avatar, "display_name": name, "last_login": _now_iso()}},
+        )
+    else:
+        # Create new user from Google profile
+        user_id = given_name
+        now = _now_iso()
+        user_doc = {
+            "user_id": user_id,
+            "username": given_name,
+            "password_hash": hash_password(str(uuid.uuid4())),  # random unusable password
+            "role": "user",
+            "created_at": now,
+            "blocked": False,
+            "last_login": now,
+            "last_activity": now,
+            "display_name": name,
+            "google_id": google_id,
+            "avatar_url": avatar,
+            "organization": None,
+            "totp_enabled": False,
+            "totp_secret": None,
+        }
+        try:
+            users_col.insert_one(user_doc)
+        except Exception:
+            user_id = f"{given_name}_{google_id[-6:]}"
+            user_doc["user_id"] = user_id
+            user_doc["username"] = user_id
+            users_col.insert_one(user_doc)
+
+    db_user = users_col.find_one({"user_id": user_id})
+    token = create_token(user_id, db_user.get("role", "user"))
+    return {
+        "success": True,
+        "token": token,
+        "user_id": user_id,
+        "username": db_user.get("username"),
+        "display_name": db_user.get("display_name"),
+        "avatar_url": db_user.get("avatar_url"),
+        "role": db_user.get("role", "user"),
+    }
+
+
+# ============================================================================
+# PER-USER POLICY ROUTES
+# ============================================================================
+
+USER_POLICIES_DB: Dict[str, List[dict]] = {}
+USER_POLICY_DIR = BASE_DIR / "user_policy_files"
+USER_POLICY_DIR.mkdir(exist_ok=True)
+
+
+@app.get("/user-policies")
+async def list_user_policies(user: dict = Depends(get_current_user)):
+    """List all policies uploaded by the current user."""
+    user_id = user["user_id"]
+    return {"policies": USER_POLICIES_DB.get(user_id, [])}
+
+
+@app.post("/user-policies/upload")
+async def upload_user_policy(
+    file: UploadFile = File(...),
+    policy_type: str = "general",
+    user: dict = Depends(get_current_user),
+):
+    """Upload a policy file (PDF/DOCX/TXT). Stored per user, isolated from other users."""
+    user_id = user["user_id"]
+    allowed = {".txt", ".pdf", ".docx", ".md"}
+    ext = Path(file.filename or "policy.txt").suffix.lower()
+    if ext not in allowed:
+        raise HTTPException(status_code=400, detail="Allowed policy types: txt, pdf, docx, md")
+
+    contents = await file.read()
+    if len(contents) > 20 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Policy file must be under 20 MB")
+
+    policy_id = str(uuid.uuid4())
+    user_dir = USER_POLICY_DIR / user_id
+    user_dir.mkdir(parents=True, exist_ok=True)
+    file_path = user_dir / f"{policy_id}{ext}"
+    file_path.write_bytes(contents)
+
+    # Extract text for chunk count estimate
+    try:
+        policy_text = extract_text_from_file(str(file_path))
+        chunk_count = max(1, len(policy_text) // 300)
+    except Exception:
+        policy_text = ""
+        chunk_count = 0
+
+    record = {
+        "id": policy_id,
+        "user_id": user_id,
+        "filename": file.filename,
+        "policy_type": policy_type,
+        "uploaded_at": _now_iso(),
+        "file_path": str(file_path),
+        "chunk_count": chunk_count,
+        "is_active": True,
+        "version": 1,
+    }
+
+    if user_id not in USER_POLICIES_DB:
+        USER_POLICIES_DB[user_id] = []
+    USER_POLICIES_DB[user_id].insert(0, record)
+
+    record_user_activity(user_id)
+    return {
+        "success": True,
+        "policy": {k: v for k, v in record.items() if k != "file_path"},
+    }
+
+
+@app.delete("/user-policies/{policy_id}")
+async def delete_user_policy(policy_id: str, user: dict = Depends(get_current_user)):
+    """Delete one of the current user's uploaded policies."""
+    user_id = user["user_id"]
+    policies = USER_POLICIES_DB.get(user_id, [])
+    target = next((p for p in policies if p["id"] == policy_id), None)
+    if not target:
+        raise HTTPException(status_code=404, detail="Policy not found")
+
+    # Remove file
+    try:
+        Path(target["file_path"]).unlink(missing_ok=True)
+    except Exception:
+        pass
+
+    USER_POLICIES_DB[user_id] = [p for p in policies if p["id"] != policy_id]
+    return {"success": True, "message": "Policy deleted"}
+
+
+@app.get("/user-policies/{policy_id}")
+async def get_user_policy_detail(policy_id: str, user: dict = Depends(get_current_user)):
+    """Get details of a specific policy."""
+    user_id = user["user_id"]
+    policies = USER_POLICIES_DB.get(user_id, [])
+    target = next((p for p in policies if p["id"] == policy_id), None)
+    if not target:
+        raise HTTPException(status_code=404, detail="Policy not found")
+    return {k: v for k, v in target.items() if k != "file_path"}
+
+
+@app.post("/user-policies/{policy_id}/reprocess")
+async def reprocess_user_policy(policy_id: str, user: dict = Depends(get_current_user)):
+    """Re-extract text and update chunk count for a policy."""
+    user_id = user["user_id"]
+    policies = USER_POLICIES_DB.get(user_id, [])
+    target = next((p for p in policies if p["id"] == policy_id), None)
+    if not target:
+        raise HTTPException(status_code=404, detail="Policy not found")
+    try:
+        policy_text = extract_text_from_file(target["file_path"])
+        chunk_count = max(1, len(policy_text) // 300)
+        target["chunk_count"] = chunk_count
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Reprocessing failed: {e}")
+    return {"success": True, "chunk_count": chunk_count}
 
 
 if __name__ == "__main__":

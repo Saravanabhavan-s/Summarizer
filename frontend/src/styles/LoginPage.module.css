@@ -333,3 +333,58 @@
   .rightPanel { width: 100%; flex: 1; padding: 24px 20px; }
   .glassCard { padding: 30px 24px; }
 }
+
+/* ── Google OAuth button ── */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dividerText { color: rgba(255, 255, 255, 0.3); font-size: 12px; }
+
+.googleBtn {
+  width: 100%;
+  padding: 13px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: inherit;
+  transition: background 0.22s, border-color 0.22s;
+}
+
+.googleBtn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.googleBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.googleG {
+  background: linear-gradient(135deg, #4285F4, #EA4335, #FBBC05, #34A853);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+}

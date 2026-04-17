@@ -543,6 +543,190 @@ export const getAdminSecurity = async () => {
   return response.data;
 };
 
+// ---------------------------------------------------------------------------
+// Profile API
+// ---------------------------------------------------------------------------
+
+export const getProfile = async () => {
+  try {
+    const response = await client.get('/profile', { headers: getAuthHeader() });
+    return response.data;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const changePassword = async (currentPassword, newPassword) => {
+  try {
+    const response = await client.post('/profile/change-password',
+      { current_password: currentPassword, new_password: newPassword },
+      { headers: { 'Content-Type': 'application/json', ...getAuthHeader() } }
+    );
+    return response.data;
+  } catch (error) {
+    return { success: false, detail: toErrorMessage(error, 'Failed to change password') };
+  }
+};
+
+export const updateDisplayName = async (displayName) => {
+  try {
+    const response = await client.put('/profile/display-name',
+      { display_name: displayName },
+      { headers: { 'Content-Type': 'application/json', ...getAuthHeader() } }
+    );
+    return response.data;
+  } catch (error) {
+    return { success: false, detail: toErrorMessage(error, 'Failed to update display name') };
+  }
+};
+
+export const updateOrganization = async (organization) => {
+  try {
+    const response = await client.put('/profile/organization',
+      { organization },
+      { headers: { 'Content-Type': 'application/json', ...getAuthHeader() } }
+    );
+    return response.data;
+  } catch (error) {
+    return { success: false, detail: toErrorMessage(error, 'Failed to update organization') };
+  }
+};
+
+export const uploadProfilePicture = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  try {
+    const response = await client.post('/profile/picture', formData, {
+      headers: { 'Content-Type': 'multipart/form-data', ...getAuthHeader() },
+    });
+    return response.data;
+  } catch (error) {
+    return { success: false, detail: toErrorMessage(error, 'Failed to upload picture') };
+  }
+};
+
+export const removeProfilePicture = async () => {
+  try {
+    const response = await client.delete('/profile/picture', { headers: getAuthHeader() });
+    return response.data;
+  } catch (error) {
+    return { success: false, detail: toErrorMessage(error, 'Failed to remove picture') };
+  }
+};
+
+export const getActiveSessions = async () => {
+  try {
+    const response = await client.get('/profile/sessions', { headers: getAuthHeader() });
+    return response.data;
+  } catch {
+    return { sessions: [] };
+  }
+};
+
+export const revokeSession = async (sessionId) => {
+  try {
+    const response = await client.delete(`/profile/sessions/${sessionId}`, { headers: getAuthHeader() });
+    return response.data;
+  } catch (error) {
+    return { success: false };
+  }
+};
+
+export const revokeAllOtherSessions = async () => {
+  try {
+    const response = await client.delete('/profile/sessions', { headers: getAuthHeader() });
+    return response.data;
+  } catch (error) {
+    return { success: false };
+  }
+};
+
+// ---------------------------------------------------------------------------
+// TOTP 2FA API
+// ---------------------------------------------------------------------------
+
+export const setupTOTP = async () => {
+  try {
+    const response = await client.post('/profile/2fa/setup', null, { headers: getAuthHeader() });
+    return response.data;
+  } catch (error) {
+    return { success: false, detail: toErrorMessage(error, 'Failed to setup 2FA') };
+  }
+};
+
+export const verifyTOTP = async (code) => {
+  try {
+    const response = await client.post('/profile/2fa/verify',
+      { code },
+      { headers: { 'Content-Type': 'application/json', ...getAuthHeader() } }
+    );
+    return response.data;
+  } catch (error) {
+    return { success: false, detail: toErrorMessage(error, 'Invalid code') };
+  }
+};
+
+export const disableTOTP = async (currentPassword) => {
+  try {
+    const response = await client.post('/profile/2fa/disable',
+      { current_password: currentPassword, new_password: currentPassword },
+      { headers: { 'Content-Type': 'application/json', ...getAuthHeader() } }
+    );
+    return response.data;
+  } catch (error) {
+    return { success: false, detail: toErrorMessage(error, 'Failed to disable 2FA') };
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Google OAuth API
+// ---------------------------------------------------------------------------
+
+export const getGoogleAuthUrl = async () => {
+  try {
+    const response = await client.get('/auth/google');
+    return response.data;
+  } catch (error) {
+    return { auth_url: null, detail: toErrorMessage(error, 'Google OAuth not configured') };
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Per-User Policy API
+// ---------------------------------------------------------------------------
+
+export const getUserPolicies = async () => {
+  try {
+    const response = await client.get('/user-policies', { headers: getAuthHeader() });
+    return response.data;
+  } catch {
+    return { policies: [] };
+  }
+};
+
+export const uploadUserPolicy = async (file, policyType = 'general') => {
+  const formData = new FormData();
+  formData.append('file', file);
+  try {
+    const response = await client.post(`/user-policies/upload?policy_type=${encodeURIComponent(policyType)}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data', ...getAuthHeader() },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(toErrorMessage(error, 'Failed to upload policy'));
+  }
+};
+
+export const deleteUserPolicy = async (policyId) => {
+  const response = await client.delete(`/user-policies/${policyId}`, { headers: getAuthHeader() });
+  return response.data;
+};
+
+export const reprocessUserPolicy = async (policyId) => {
+  const response = await client.post(`/user-policies/${policyId}/reprocess`, null, { headers: getAuthHeader() });
+  return response.data;
+};
+
 export default {
   loginUser,
   registerUser,
@@ -597,4 +781,25 @@ export default {
   getAdminSettings,
   updateAdminSettings,
   getAdminSecurity,
+  // Profile
+  getProfile,
+  changePassword,
+  updateDisplayName,
+  updateOrganization,
+  uploadProfilePicture,
+  removeProfilePicture,
+  getActiveSessions,
+  revokeSession,
+  revokeAllOtherSessions,
+  // 2FA
+  setupTOTP,
+  verifyTOTP,
+  disableTOTP,
+  // Google OAuth
+  getGoogleAuthUrl,
+  // User Policies
+  getUserPolicies,
+  uploadUserPolicy,
+  deleteUserPolicy,
+  reprocessUserPolicy,
 };

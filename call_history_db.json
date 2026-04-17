@@ -1,6 +1,42 @@
 {
   "admin": [
     {
+      "id": "71849913-5a02-4430-93a2-37d6713b2910",
+      "filename": "call log 2.m4a",
+      "duration_seconds": 115,
+      "summary": "The call was to place an order for one dozen long-stemmed red roses, which will be delivered within twenty-four hours for a total of $40. The customer provided their name, contact information, and shipping address for the order processing.",
+      "quality_score": 57.6,
+      "empathy_score": 36.0,
+      "professionalism_score": 70.0,
+      "compliance_score": 68.5,
+      "resolution_score": 76.8,
+      "language_detected": "English",
+      "language_proficiency_score": 90.0,
+      "efficiency_score": 85.0,
+      "bias_reduction_score": 100.0,
+      "customer_emotion": "Happy",
+      "sales_opportunity_score": 30.0,
+      "time_taken_seconds": 11.52,
+      "report_pdf_available": false,
+      "transcript_available": true,
+      "violations": [
+        "Profanity detected: 'hell'"
+      ],
+      "improvements": [
+        "Confirm order/product numbers and state clear resolution",
+        "Use more empathy phrases (e.g., 'I understand', 'I apologize')"
+      ],
+      "formatted_transcript": "Agent: Thank you for calling Martha's Flourist. How may I assist you?\nCustomer: Hello. I'd like to order flowers, and I think you have what I'm looking for.\nAgent: I'd be happy to take care of your order. May I have your name, please?\nCustomer: Randall Thomas.\nAgent: Randall Thomas. Can you spell that for me?\nCustomer: Randall, r a n d a l l, Thomas, t h o n a n.\nAgent: Thank you for that information, Randall. May I have your home or office number area code first?\nCustomer: Area code 409 then 58665088.\nAgent: That's (409) 866-5088. Do you have a fax number or email address?\nCustomer: My email is randall.thomas@gmail.com.\nAgent: Randall.thomas@gmail.com. May I have your shipping address?\nCustomer: 6800\nAgent: Okay.\nCustomer: Gladys Avenue, Beaumont, Texas. ZIP code is 77706.\nAgent: Gladys Avenue, Beaumont, Texas. ZIP code 77706. Thank you for the information. What products were you interested in purchasing?\nCustomer: Red roses. Probably a dozen.\nAgent: One dozen of red roses. Do you want long stems?\nCustomer: Yes, sir.\nAgent: Alright. Randall, let me process your order. One moment, please.\nCustomer: Okay.\nAgent: Randall, you're ordering one dozen long stemmed red roses. The total amount of your order is $40, and it will be shipped to your address within twenty four hours.\nCustomer: I was looking to deliver my roses again?\nAgent: Within twenty four hours.\nCustomer: Okay. No problem.\nAgent: Is there anything else I can help you with?\nCustomer: That's all for now. Thanks.\nAgent: No problem, Randall. Thank you for calling Martha's Florist. Have a nice day.",
+      "speaker_map": {
+        "0": "Agent",
+        "1": "Customer"
+      },
+      "timestamp": "2026-04-15T13:15:13.354244",
+      "user_id": "admin",
+      "tokens_used_estimate": 737,
+      "transcript_path": "D:\\Summarizer\\generated_transcripts\\71849913-5a02-4430-93a2-37d6713b2910_calllog2.txt"
+    },
+    {
       "id": "6780b489-1a08-4b90-8eb2-24394d7cb90d",
       "filename": "human_chat.txt",
       "duration_seconds": 0,

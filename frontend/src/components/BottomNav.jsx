@@ -1,8 +1,8 @@
 /**
  * BottomNav — Mobile bottom navigation bar (visible only on ≤768px screens)
  *
- * Mirrors the sidebar nav items. Admin tab only shown for admin users.
- * Fixed to the bottom of the viewport.
+ * New layout: Home | History | Reports | Policy | Profile
+ * Sign Out removed — it now lives inside ProfilePage.
  */
 
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -10,47 +10,33 @@ import { useAuth } from '../contexts/AuthContext';
 import styles from '../styles/BottomNav.module.css';
 
 const NAV_ITEMS = [
-  { id: 'upload',  label: 'Home',    icon: '📤', path: '/dashboard' },
-  { id: 'history', label: 'Calls',   icon: '📋', path: '/history' },
+  { id: 'home',    label: 'Home',    icon: '📤', path: '/dashboard' },
+  { id: 'history', label: 'History', icon: '📋', path: '/history' },
   { id: 'reports', label: 'Reports', icon: '📊', path: '/reports' },
-  { id: 'compare', label: 'Analysis',icon: '⚖️', path: '/compare' },
   { id: 'live',    label: 'Live',    icon: '🎙️', path: '/live-transcription' },
+  { id: 'policy',  label: 'Policy',  icon: '📄', path: '/policy' },
+  { id: 'profile', label: 'Profile', icon: '👤', path: '/profile' },
 ];
-
-const ADMIN_ITEM = { id: 'admin', label: 'Admin', icon: '🛡️', path: '/admin' };
-const SIGN_OUT_ITEM = { id: 'signout', label: 'Sign Out', icon: '↩' };
 
 export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login', { replace: true });
-  };
+  const { user } = useAuth();
 
   const isActive = (path) => {
     if (path === '/dashboard') return location.pathname === '/dashboard';
     return location.pathname.startsWith(path);
   };
 
-  const roleBasedItems = user?.role === 'admin'
-    ? [...NAV_ITEMS, ADMIN_ITEM]
-    : NAV_ITEMS;
-
-  const navItems = [...roleBasedItems, SIGN_OUT_ITEM];
-
   return (
     <nav className={styles.bottomNav} aria-label="Mobile navigation">
-      {navItems.map((item) => {
-        const isSignOut = item.id === 'signout';
-        const active = isSignOut ? false : isActive(item.path);
+      {NAV_ITEMS.map((item) => {
+        const active = isActive(item.path);
         return (
           <button
             key={item.id}
-            className={`${styles.navItem} ${active ? styles.active : ''} ${isSignOut ? styles.signOutItem : ''}`}
-            onClick={isSignOut ? handleLogout : () => navigate(item.path)}
+            className={`${styles.navItem} ${active ? styles.active : ''}`}
+            onClick={() => navigate(item.path)}
             aria-label={item.label}
           >
             <span className={styles.icon}>{item.icon}</span>

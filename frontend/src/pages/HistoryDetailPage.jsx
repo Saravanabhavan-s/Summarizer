@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ResultDashboard from '../components/ResultDashboard';
+import TranscriptChatWindow from '../components/TranscriptChatWindow';
 import { getServerResult, downloadResultPdf, downloadResultTranscript } from '../utils/api';
 import styles from '../styles/PageLayout.module.css';
 
@@ -120,7 +121,14 @@ export default function HistoryDetailPage() {
             {liveTranscript && (
               <div className={styles.liveTranscriptBlock}>
                 <p className={styles.liveSubTitle}>Full Transcription</p>
-                <p className={styles.liveTranscript}>{liveTranscript}</p>
+                <TranscriptChatWindow result={{
+                  formatted_transcript: result.formatted_transcript || liveTranscript,
+                  transcript: liveTranscript,
+                  violations: result.violations || result.report_data?.violations || [],
+                  improvements: result.improvements || result.report_data?.improvements || [],
+                  duration_seconds: result.duration_seconds,
+                  filename: result.filename || result.audio_name,
+                }} />
               </div>
             )}
 
