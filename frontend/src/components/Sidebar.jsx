@@ -16,7 +16,6 @@ const NAV_ITEMS = [
   { id: 'history',  label: 'History',  icon: '📋', path: '/history' },
   { id: 'compare',  label: 'Compare',  icon: '⚖️',  path: '/compare' },
   { id: 'reports',  label: 'Reports',  icon: '📊', path: '/reports' },
-  { id: 'policy',   label: 'Policy',   icon: '📄', path: '/policy' },
   { id: 'live',     label: 'Live',     icon: '🎙️', path: '/live-transcription' },
 ];
 

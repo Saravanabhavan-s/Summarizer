@@ -2378,12 +2378,26 @@ async def reprocess_user_policy(policy_id: str, user: dict = Depends(get_current
     target = next((p for p in policies if p["id"] == policy_id), None)
     if not target:
         raise HTTPException(status_code=404, detail="Policy not found")
+
+    file_path = str(target.get("file_path") or "").strip()
+    if not file_path:
+        raise HTTPException(status_code=409, detail="Policy record is missing file path")
+
+    policy_file = Path(file_path)
+    if not policy_file.exists():
+        raise HTTPException(status_code=404, detail="Policy file not found on disk")
+
     try:
-        policy_text = extract_text_from_file(target["file_path"])
+        policy_text = extract_text_from_file(str(policy_file))
         chunk_count = max(1, len(policy_text) // 300)
         target["chunk_count"] = chunk_count
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Unsupported policy file type: {e}") from e
+    except ImportError as e:
+        raise HTTPException(status_code=500, detail=f"Missing parser dependency: {e}") from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Reprocessing failed: {e}")
+        raise HTTPException(status_code=422, detail=f"Policy reprocessing failed: {e}") from e
+
     return {"success": True, "chunk_count": chunk_count}
 
 

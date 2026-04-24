@@ -6,9 +6,10 @@
  *  2. Account Details
  *  3. Change Password (with strength bar + show/hide)
  *  4. Profile Picture Upload
- *  5. Active Sessions
- *  6. Two-Factor Authentication (TOTP setup + Google OAuth link)
- *  7. Danger Zone (Sign Out)
+ *  5. My Policy Files (upload + manage)
+ *  6. Active Sessions
+ *  7. Two-Factor Authentication (TOTP setup + Google OAuth link)
+ *  8. Danger Zone (Sign Out)
  *
  * Fully responsive: desktop / tablet / mobile / small-screen.
  */
@@ -31,7 +32,14 @@ import {
   verifyTOTP,
   disableTOTP,
   getGoogleAuthUrl,
+  getUserPolicies,
+  uploadUserPolicy,
+  deleteUserPolicy,
+  reprocessUserPolicy,
 } from '../utils/api';
+
+const POLICY_ALLOWED_EXTENSIONS = ['.txt', '.pdf', '.docx', '.md'];
+const POLICY_MAX_SIZE_BYTES = 20 * 1024 * 1024;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -135,6 +143,7 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const { user, logout, updateProfile, refreshProfile } = useAuth();
   const fileInputRef = useRef(null);
+  const policyFileInputRef = useRef(null);
   const totpInputRef = useRef(null);
 
   const [toast, setToast] = useState(null);
@@ -159,6 +168,12 @@ export default function ProfilePage() {
   const [sessions, setSessions] = useState([]);
   const [sessionsLoaded, setSessionsLoaded] = useState(false);
 
+  // Per-user policies
+  const [policies, setPolicies] = useState([]);
+  const [policiesLoaded, setPoliciesLoaded] = useState(false);
+  const [policyType, setPolicyType] = useState('general');
+  const [policyFile, setPolicyFile] = useState(null);
+
   // 2FA
   const [totp, setTotp] = useState({ qr: null, secret: null, code: '' });
   const [totpStep, setTotpStep] = useState('idle'); // 'idle' | 'setup' | 'verify' | 'enabled'
@@ -167,6 +182,7 @@ export default function ProfilePage() {
   const [openSections, setOpenSections] = useState({
     password: false,
     picture: false,
+    policies: false,
     sessions: false,
     twofa: false,
     danger: false,
@@ -207,6 +223,23 @@ export default function ProfilePage() {
         .catch(() => { setSessions([]); setSessionsLoaded(true); });
     }
   }, [openSections.sessions, sessionsLoaded]);
+
+  const loadUserPolicies = useCallback(async () => {
+    try {
+      const data = await getUserPolicies();
+      setPolicies(Array.isArray(data?.policies) ? data.policies : []);
+    } catch {
+      setPolicies([]);
+    } finally {
+      setPoliciesLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (openSections.policies && !policiesLoaded) {
+      loadUserPolicies();
+    }
+  }, [openSections.policies, policiesLoaded, loadUserPolicies]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -282,6 +315,84 @@ export default function ProfilePage() {
     await revokeSession(sessionId);
     setSessions((prev) => prev.filter((s) => s.session_id !== sessionId));
     showToast('Session revoked');
+  });
+
+  const handlePolicyFileSelect = (event) => {
+    const nextFile = event.target.files?.[0];
+    if (!nextFile) return;
+
+    const extension = `.${(nextFile.name.split('.').pop() || '').toLowerCase()}`;
+
+    if (!POLICY_ALLOWED_EXTENSIONS.includes(extension)) {
+      showToast('Allowed policy types: TXT, PDF, DOCX, MD', 'error');
+      event.target.value = '';
+      return;
+    }
+
+    if (nextFile.size > POLICY_MAX_SIZE_BYTES) {
+      showToast('Policy file must be under 20 MB', 'error');
+      event.target.value = '';
+      return;
+    }
+
+    setPolicyFile(nextFile);
+  };
+
+  const handlePolicyUpload = () => runBusy('policyUpload', async () => {
+    if (!policyFile) return;
+
+    try {
+      const result = await uploadUserPolicy(policyFile, policyType);
+      if (!result?.success) {
+        showToast(result?.detail || 'Failed to upload policy', 'error');
+        return;
+      }
+
+      setPolicyFile(null);
+      if (policyFileInputRef.current) {
+        policyFileInputRef.current.value = '';
+      }
+
+      await loadUserPolicies();
+      showToast('Policy uploaded');
+    } catch (error) {
+      showToast(error?.message || 'Failed to upload policy', 'error');
+    }
+  });
+
+  const handlePolicyDelete = (policyId) => runBusy(`policyDelete-${policyId}`, async () => {
+    const confirmed = window.confirm('Delete this policy file?');
+    if (!confirmed) return;
+
+    try {
+      const result = await deleteUserPolicy(policyId);
+      if (result?.success) {
+        setPolicies((prev) => prev.filter((item) => item.id !== policyId));
+        showToast('Policy deleted');
+      } else {
+        showToast(result?.detail || 'Failed to delete policy', 'error');
+      }
+    } catch (error) {
+      showToast(error?.message || 'Failed to delete policy', 'error');
+    }
+  });
+
+  const handlePolicyReprocess = (policyId) => runBusy(`policyReprocess-${policyId}`, async () => {
+    try {
+      const result = await reprocessUserPolicy(policyId);
+      if (result?.success) {
+        setPolicies((prev) => prev.map((item) => (
+          item.id === policyId
+            ? { ...item, chunk_count: result.chunk_count ?? item.chunk_count }
+            : item
+        )));
+        showToast('Policy reprocessed');
+      } else {
+        showToast(result?.detail || 'Failed to reprocess policy', 'error');
+      }
+    } catch (error) {
+      showToast(error?.message || 'Failed to reprocess policy', 'error');
+    }
   });
 
   const handleRevokeAll = () => runBusy('revokeAll', async () => {
@@ -643,6 +754,112 @@ export default function ProfilePage() {
                       )}
                     </div>
                     <p className={styles.hintText}>Max 5 MB · JPG, PNG, WebP, GIF</p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* ── My Policy Files ── */}
+          <div className={styles.card}>
+            <button
+              className={styles.collapsibleHeader}
+              onClick={() => toggleSection('policies')}
+              type="button"
+            >
+              <span>📄 My Policy Files</span>
+              <span className={`${styles.chevron} ${openSections.policies ? styles.chevronOpen : ''}`}>›</span>
+            </button>
+            <AnimatePresence initial={false}>
+              {openSections.policies && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.28 }}
+                  style={{ overflow: 'hidden' }}
+                >
+                  <div className={styles.section}>
+                    <input
+                      ref={policyFileInputRef}
+                      type="file"
+                      accept=".txt,.pdf,.docx,.md"
+                      onChange={handlePolicyFileSelect}
+                      style={{ display: 'none' }}
+                    />
+                    <div className={styles.policyUploadRow}>
+                      <button
+                        type="button"
+                        className={styles.outlineBtn}
+                        onClick={() => policyFileInputRef.current?.click()}
+                        disabled={busy === 'policyUpload'}
+                      >
+                        📁 Choose Policy
+                      </button>
+
+                      <select
+                        className={styles.selectInput}
+                        value={policyType}
+                        onChange={(event) => setPolicyType(event.target.value)}
+                        disabled={busy === 'policyUpload'}
+                      >
+                        <option value="general">General</option>
+                        <option value="compliance">Compliance</option>
+                        <option value="script">Script</option>
+                        <option value="knowledge-base">Knowledge Base</option>
+                      </select>
+
+                      <button
+                        type="button"
+                        className={styles.primaryBtn}
+                        onClick={handlePolicyUpload}
+                        disabled={busy === 'policyUpload' || !policyFile}
+                      >
+                        {busy === 'policyUpload' ? 'Uploading…' : 'Upload Policy'}
+                      </button>
+                    </div>
+
+                    {policyFile && (
+                      <p className={styles.mutedText}>Selected file: {policyFile.name}</p>
+                    )}
+                    <p className={styles.hintText}>Allowed: TXT, PDF, DOCX, MD · Max 20 MB</p>
+
+                    {!policiesLoaded && (
+                      <p className={styles.mutedText}>Loading your policies…</p>
+                    )}
+
+                    {policiesLoaded && policies.length === 0 && (
+                      <p className={styles.mutedText}>No policy files uploaded yet.</p>
+                    )}
+
+                    {policies.map((policy) => (
+                      <div key={policy.id} className={styles.policyRow}>
+                        <div className={styles.policyInfo}>
+                          <p className={styles.policyName}>{policy.filename || 'Untitled policy'}</p>
+                          <p className={styles.policyMeta}>
+                            Type: {policy.policy_type || 'general'} · Uploaded: {formatDateTime(policy.uploaded_at)} · Chunks: {policy.chunk_count ?? 0} · v{policy.version ?? 1}
+                          </p>
+                        </div>
+                        <div className={styles.policyActions}>
+                          <button
+                            type="button"
+                            className={styles.outlineBtn}
+                            onClick={() => handlePolicyReprocess(policy.id)}
+                            disabled={busy === `policyReprocess-${policy.id}`}
+                          >
+                            {busy === `policyReprocess-${policy.id}` ? 'Reprocessing…' : 'Reprocess'}
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.dangerOutlineBtn}
+                            onClick={() => handlePolicyDelete(policy.id)}
+                            disabled={busy === `policyDelete-${policy.id}`}
+                          >
+                            {busy === `policyDelete-${policy.id}` ? 'Deleting…' : 'Delete'}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </motion.div>
               )}

@@ -1,7 +1,7 @@
 /**
  * BottomNav — Mobile bottom navigation bar (visible only on ≤768px screens)
  *
- * New layout: Home | History | Reports | Policy | Profile
+ * New layout: Home | History | Reports | Live | Profile
  * Sign Out removed — it now lives inside ProfilePage.
  */
 
@@ -14,7 +14,6 @@ const NAV_ITEMS = [
   { id: 'history', label: 'History', icon: '📋', path: '/history' },
   { id: 'reports', label: 'Reports', icon: '📊', path: '/reports' },
   { id: 'live',    label: 'Live',    icon: '🎙️', path: '/live-transcription' },
-  { id: 'policy',  label: 'Policy',  icon: '📄', path: '/policy' },
   { id: 'profile', label: 'Profile', icon: '👤', path: '/profile' },
 ];
 

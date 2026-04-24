@@ -1,6 +1,6 @@
 """
 Text extraction utilities for EchoScore.
-Supports .txt, .pdf, and .docx transcript files.
+Supports .txt, .md, .pdf, and .docx transcript files.
 """
 
 from pathlib import Path
@@ -8,7 +8,7 @@ from pathlib import Path
 
 def extract_text_from_file(file_path: str) -> str:
     """
-    Read textual content from a .txt, .pdf, or .docx file.
+    Read textual content from a .txt, .md, .pdf, or .docx file.
 
     Args:
         file_path: Absolute or relative path to the file.
@@ -27,7 +27,7 @@ def extract_text_from_file(file_path: str) -> str:
 
     ext = path.suffix.lower()
 
-    if ext == ".txt":
+    if ext in {".txt", ".md"}:
         return _read_txt(path)
     elif ext == ".pdf":
         return _read_pdf(path)

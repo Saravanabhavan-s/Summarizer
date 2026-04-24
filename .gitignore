@@ -6,5 +6,8 @@ audio_and_txt/
 make_pdf.py
 generated_transcripts/
 generated_reports/
+call_history_db.json
+call_history_db.tmp
+user_policy_files/
 policy.txt
 policy_files/

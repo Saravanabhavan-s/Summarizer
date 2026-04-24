@@ -718,13 +718,21 @@ export const uploadUserPolicy = async (file, policyType = 'general') => {
 };
 
 export const deleteUserPolicy = async (policyId) => {
-  const response = await client.delete(`/user-policies/${policyId}`, { headers: getAuthHeader() });
-  return response.data;
+  try {
+    const response = await client.delete(`/user-policies/${policyId}`, { headers: getAuthHeader() });
+    return response.data;
+  } catch (error) {
+    throw new Error(toErrorMessage(error, 'Failed to delete policy'));
+  }
 };
 
 export const reprocessUserPolicy = async (policyId) => {
-  const response = await client.post(`/user-policies/${policyId}/reprocess`, null, { headers: getAuthHeader() });
-  return response.data;
+  try {
+    const response = await client.post(`/user-policies/${policyId}/reprocess`, null, { headers: getAuthHeader() });
+    return response.data;
+  } catch (error) {
+    throw new Error(toErrorMessage(error, 'Failed to reprocess policy'));
+  }
 };
 
 export default {

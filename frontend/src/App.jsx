@@ -151,15 +151,7 @@ export default function App() {
           path="/policy"
           element={
             <ProtectedRoute>
-              <DashboardLayout>
-                <PageWrapper>
-                  <div style={{ padding: '32px', color: 'rgba(255,255,255,0.7)', textAlign: 'center' }}>
-                    <p style={{ fontSize: 48, margin: '0 0 16px' }}>📄</p>
-                    <h2 style={{ color: '#fff', margin: '0 0 8px' }}>Policy Management</h2>
-                    <p>Upload and manage your organization's compliance policies. Coming soon.</p>
-                  </div>
-                </PageWrapper>
-              </DashboardLayout>
+              <Navigate to="/profile" replace />
             </ProtectedRoute>
           }
         />
