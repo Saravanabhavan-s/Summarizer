@@ -52,6 +52,7 @@ from rag_pipeline import (
     get_policy_path,
 )
 from live_transcription import live_router
+from routes.policy_routes import router as policy_router
 
 # ---------------------------------------------------------------------------
 # Authentication & Authorization
@@ -462,6 +463,9 @@ async def cors_preflight_handler(full_path: str):
 
 # Register live-transcription router (new feature — additive only)
 app.include_router(live_router)
+
+# Register policy workspace router (all authenticated users)
+app.include_router(policy_router)
 
 
 

@@ -33,7 +33,11 @@ import AdminPolicyPage from './pages/AdminPolicyPage';
 import AdminLogsPage from './pages/AdminLogsPage';
 import AdminSettingsPage from './pages/AdminSettingsPage';
 import LiveTranscriptionPage from './pages/LiveTranscriptionPage';
+<<<<<<< HEAD
 import ProfilePage from './pages/ProfilePage';
+=======
+import PolicyWorkspacePage from './pages/PolicyWorkspacePage';
+>>>>>>> bc84c8d (Policy management PROPER UPDATE)
 import appStyles from './styles/App.module.css';
 import BottomNav from './components/BottomNav';
 
@@ -138,16 +142,25 @@ export default function App() {
           }
         />
         <Route
+<<<<<<< HEAD
           path="/profile"
           element={
             <ProtectedRoute>
               <DashboardLayout>
                 <PageWrapper><ProfilePage /></PageWrapper>
+=======
+          path="/policies"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <PageWrapper><PolicyWorkspacePage /></PageWrapper>
+>>>>>>> bc84c8d (Policy management PROPER UPDATE)
               </DashboardLayout>
             </ProtectedRoute>
           }
         />
         <Route
+<<<<<<< HEAD
           path="/policy"
           element={
             <ProtectedRoute>
@@ -156,6 +169,8 @@ export default function App() {
           }
         />
         <Route
+=======
+>>>>>>> bc84c8d (Policy management PROPER UPDATE)
           path="/admin"
           element={
             <AdminRoute>
