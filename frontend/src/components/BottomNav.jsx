@@ -10,19 +10,12 @@ import { useAuth } from '../contexts/AuthContext';
 import styles from '../styles/BottomNav.module.css';
 
 const NAV_ITEMS = [
-<<<<<<< HEAD
-  { id: 'home',    label: 'Home',    icon: '📤', path: '/dashboard' },
-  { id: 'history', label: 'History', icon: '📋', path: '/history' },
-  { id: 'reports', label: 'Reports', icon: '📊', path: '/reports' },
-  { id: 'live',    label: 'Live',    icon: '🎙️', path: '/live-transcription' },
-  { id: 'profile', label: 'Profile', icon: '👤', path: '/profile' },
-=======
-  { id: 'upload',  label: 'Home',     icon: '📤', path: '/dashboard' },
-  { id: 'history', label: 'Calls',    icon: '📋', path: '/history' },
-  { id: 'policies',label: 'Policies', icon: '📜', path: '/policies' },
-  { id: 'reports', label: 'Reports',  icon: '📊', path: '/reports' },
-  { id: 'live',    label: 'Live',     icon: '🎙️', path: '/live-transcription' },
->>>>>>> bc84c8d (Policy management PROPER UPDATE)
+  { id: 'home',     label: 'Home',     icon: '📤', path: '/dashboard' },
+  { id: 'history',  label: 'History',  icon: '📋', path: '/history' },
+  { id: 'policies', label: 'Policies', icon: '📜', path: '/policies' },
+  { id: 'reports',  label: 'Reports',  icon: '📊', path: '/reports' },
+  { id: 'live',     label: 'Live',     icon: '🎙️', path: '/live-transcription' },
+  { id: 'profile',  label: 'Profile',  icon: '👤', path: '/profile' },
 ];
 
 export default function BottomNav() {
