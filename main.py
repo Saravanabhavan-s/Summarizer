@@ -445,7 +445,12 @@ app = FastAPI(
 if "admin" not in USERS_DB:
     result = create_admin_user(username="admin", password="admin123")
     print(f"[STARTUP] {result['message']}")
-origins = os.getenv("ALLOWED_ORIGINS", "").split(",")
+origins = os.getenv("ALLOWED_ORIGINS")
+
+if origins:
+    origins = origins.split(",")
+else:
+    origins = ["https://echoscore-sigma.vercel.app"]
 # Enable CORS for frontend
 app.add_middleware(
     CORSMiddleware,
